@@ -363,7 +363,7 @@ To install Terraform, download the appropriate package for your operating system
 1. **Installing virtualization(KVM Libvirt)**:
     For us to get started we will need to have virtualization enabled on our host machine. Check this link below and follow the steps to install kvm on your machine.
     <https://www.linuxtechi.com/how-to-install-kvm-on-ubuntu-22-04/>
-
+<!-- 
 2. **Add provider dmacvicar/libvirt to terraform**:
     In order to get started with our terraform project we will need the provider, dmacvicar/libvirt in our case. Follow the steps below to achieve this goal. Note that you will have to adjust the version(0.7.6) and os_architecture(linux_amd64) to fit your specs and requirements.
 
@@ -395,7 +395,7 @@ To install Terraform, download the appropriate package for your operating system
 
     \`\`\`bash
     qemu-img resize path/to/jammy-server-cloudimg-amd64-disk-kvm.img +10G
-    \`\`\`
+    \`\`\` -->
 
 ---
 
