@@ -1,0 +1,7 @@
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+jammy-server-cloudimg-amd64-disk-kvm.img
+jammy-server-cloudimg-amd64-disk-kvm.qcow2
+ansible_hosts.ini
