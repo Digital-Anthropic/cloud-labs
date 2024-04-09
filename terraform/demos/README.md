@@ -2,12 +2,36 @@
 
 ---
 
-## Terraform Steps
+## why?
 
+What is the purpose of this demo? Why do we do this?
+
+What do we apply in here from the theory part?
+
+What do we expect to learn/achieve?
+
+## What the demo entails?
+
+Setting up via terraform Virtual Machines using the libvirt/KVM hypervisor.
+
+Requirements:
+- number of instances
+- different specifications per instances
+- create hosts file for ansible
+
+## Prerequisites
+
+
+Talk to the user.
+We need to install a hypervisor to create/manage Virtual Machines. The defacto hypervisor for Linux is KVM, we will also use it.
+
+Use bash instructions, also please validate them; also there were some extra configs that had to be done, selinux or apparmor if im not mistaken
 1. **Installing virtualization(KVM Libvirt)**:
     For us to get started we will need to have virtualization enabled on our host machine. Check this link below and follow the steps to install kvm on your machine.
     <https://www.linuxtechi.com/how-to-install-kvm-on-ubuntu-22-04/>
 
+
+Is this needed? won't terraform init pull it?
 2. **Add provider dmacvicar/libvirt to terraform**:
     In order to get started with our terraform project we will need the provider, dmacvicar/libvirt in our case. Follow the steps below to achieve this goal. Note that you will have to adjust the version(0.7.6) and os_architecture(linux_amd64) to fit your specs and requirements.
 
@@ -29,6 +53,7 @@
     unzip terraform-provider-libvirt_0.7.6_linux_amd64.zip
     ```
 
+Why do we need an Ubuntu VM? Talk to the user
 3. **Download Ubuntu image for VMs**:
     To install Ubuntu on our virtual machines we will need the OS image. I will leave a link below from where you can find some Ubuntu images:
     <https://cloud-images.ubuntu.com/jammy/current/>.
@@ -40,3 +65,14 @@
     ```bash
     qemu-img resize path/to/jammy-server-cloudimg-amd64-disk-kvm.img +10G
     ```
+
+## How to run the demo?
+
+create directory
+
+pull the github repo
+cd to proper path
+
+terraform init
+terraform plan
+terraform apply

@@ -1,16 +1,28 @@
 # Terraform and Infrastructure as Code (IAC) Documentation
 
+
+## Introduction
+
+Terraform is an open-source Infrastructure as Code (IAC) tool created by HashiCorp. It allows you to define and provision infrastructure using a declarative configuration language. This documentation provides an overview of Terraform, its components, the benefits of adopting Infrastructure as Code practices and also how to get started with the code provided.
+
+What is terraform at the core? a reconciler; how do we explain this?
+
+We ask ourselves how do we know the current state of the infra is the right one?
+Or what is the source of truth?
+
+And terraform basically reconciles the source of truth and we will see below what that is, with the actual setup in cloud.
+
+
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Infrastructure as Code (IAC)](#infrastructure-as-code-iac)
+1. [Infrastructure as Code (IAC)](#infrastructure-as-code-iac)
     - [Benefits of IAC](#benefits-of-iac)
-3. [Terraform Overview](#terraform-overview)
+2. [Terraform Overview](#terraform-overview)
     - [Declarative Configuration](#declarative-configuration)
     - [State Management](#state-management)
     - [Plan and Apply Workflow](#plan-and-apply-workflow)
     - [Multi-Cloud Support](#multi-cloud-support)
-4. [Terraform Basics](#terraform-basics)
+3. [Terraform Basics](#terraform-basics)
     - [Providers](#providers)
     - [Resources](#resources)
     - [Variables](#variables)
@@ -29,19 +41,14 @@
     - [State Management Commands](#state-management-commands)
     - [Locking](#locking)
     - [Sensitive Data](#sensitive-data)
-5. [Installation](#installation)
+4. [Installation](#installation)
 
----
+## Start the same with a problem statement. Why do we need terraform? What are the pain points of not using IaC?
+   People need to understand what issue they are trying to solve
 
-## Introduction
+## Infrastructure as Code (IaC)
 
-Terraform is an open-source Infrastructure as Code (IAC) tool created by HashiCorp. It allows you to define and provision infrastructure using a declarative configuration language. This documentation provides an overview of Terraform, its components, the benefits of adopting Infrastructure as Code practices and also how to get started with the code provided.
-
----
-
-## Infrastructure as Code (IAC)
-
-Infrastructure as Code (IAC) is a key concept in modern DevOps and cloud computing practices. It refers to the process of managing and provisioning infrastructure using code and automation rather than manual processes.
+Infrastructure as Code (IaC) is a key concept in modern DevOps and cloud computing practices. It refers to the process of managing and provisioning infrastructure using code and automation rather than manual processes.
 
 ### Benefits of IAC
 
@@ -54,6 +61,8 @@ Infrastructure as Code (IAC) is a key concept in modern DevOps and cloud computi
 
 - **Consistent Deployments**: Ensure consistent and repeatable deployments across different environments (development, staging, production) by using code to define infrastructure.
 - **Environment Parity**: Maintain consistent configurations between development, testing, and production environments to reduce discrepancies and deployment issues.
+
+Where is the reproducibility? talk about rollbacks? how did we manage rollbacks before IaC? hard, very hard, you can't expect to remember all tiny bits and pieces you changed
 
 #### Automation and Efficiency
 
@@ -69,25 +78,13 @@ Infrastructure as Code (IAC) is a key concept in modern DevOps and cloud computi
 
 ## Terraform Overview
 
-### Declarative Configuration
-
-Terraform uses a declarative configuration language called HashiCorp Configuration Language (HCL) to define the infrastructure and resources. With HCL, you can specify the desired state of your infrastructure, and Terraform will automatically determine the actions to achieve that state.
-
-```hcl
-resource "libvirt_network" "example" {
-  name = "terraform-network"
-  mode = "nat"
-}
-```
-
 ### State Management
 
 Terraform maintains a consistent state of your infrastructure by tracking changes and dependencies between resources. The `tfstate` file stores the current state of your infrastructure, allowing Terraform to understand which resources need to be created, updated, or destroyed.
 
 #### Best Practices for State Management
 
-- **Secure Storage**: Ensure the `tfstate` file is stored securely to protect sensitive information. Avoid storing it in plaintext or in public repositories.
-- **Version Control**: Although the state file contains sensitive and critical information, it's recommended to maintain it in version control systems with proper access controls.
+- **Secure Storage**: Ensure the `tfstate` file is stored securely to protect sensitive information. Avoid storing it in public repositories.
 - **Collaboration**: For team-based projects, storing the state file in a shared location enables collaboration and ensures that all team members are working with the same infrastructure state.
 - **Backup**: Regularly backup the state file to prevent data loss in case of accidental deletion or corruption.
 
@@ -128,11 +125,13 @@ For more information on configuring AWS S3 as a Terraform backend, refer to the 
 
 ### Plan and Apply Workflow
 
-Terraform provides a series of commands to manage and apply your infrastructure configurations in a systematic manner. Below are the key steps involved in the Terraform workflow, from initializing your workspace to applying the configuration and checking the resources using `virsh`.
+Terraform provides a series of commands to manage and apply your infrastructure configurations in a systematic manner. Below are the key steps involved in the Terraform workflow, from initializing your workspace to applying the configuration and checking the outputs(if there are any).
 
 #### Initialize Terraform Workspace
 
-Before applying any Terraform configurations, it's essential to initialize the Terraform workspace. This step downloads the required provider plugins and initializes the backend.
+Before applying any Terraform configurations, it's essential to initialize the Terraform workspace.
+
+This step downloads the required provider plugins and initializes the backend and installs any required modules.
 
 ```bash
 terraform init
@@ -157,76 +156,6 @@ terraform apply "plan"
 ```
 
 By following this `plan` and `apply` workflow, you can preview and apply changes to your infrastructure.
-
-#### Apply Terraform Configuration
-
-After reviewing the execution plan and ensuring everything looks correct, you can apply the Terraform configuration to create or update the infrastructure resources.
-
-```bash
-terraform apply
-```
-
-#### Check Created Resources with `virsh`
-
-After successfully applying the Terraform configuration, you can use the `virsh` command to list the virtual machines managed by libvirt and verify that the resources were created as expected.
-
-```bash
-virsh list --all
-```
-
-### Multi-Cloud Support
-
-Terraform supports provisioning and managing resources across multiple cloud providers and on-premises environments using a single tool.
-
-#### Using Multiple `azurerm` Providers with Resources
-
-You can specify multiple `azurerm` providers in your Terraform configuration to manage resources across different Azure subscriptions. Below is an example that demonstrates how to use two `azurerm` providers to create resources in two different Azure Resource Groups (RGs):
-
-```hcl
-provider "azurerm" {
-  alias   = "subscription1"
-  features {}
-}
-
-provider "azurerm" {
-  alias   = "subscription2"
-  features {}
-}
-
-resource "azurerm_resource_group" "example" {
-  provider             = azurerm.subscription1
-  name                 = "example-resources-subscription1"
-}
-
-resource "azurerm_resource_group" "example_subscription2" {
-  provider             = azurerm.subscription2
-  name                 = "example-resources-subscription2"
-}
-```
-
-#### Using `azurerm` and `aws` Providers with Resources
-
-You can also use both `azurerm` and `aws` providers in the same Terraform configuration. Below is an example that demonstrates how to use one `aws` provider and two `azurerm` providers to manage resources across AWS and Azure:
-
-```hcl
-provider "azurerm" {
-  features {}
-}
-
-provider "aws" {
-}
-
-resource "azurerm_resource_group" "example" {
-  provider = azurerm
-  name     = "example-resources"
-}
-
-resource "aws_s3_bucket" "example" {
-  provider = aws
-  bucket   = "my-example-bucket"
-  acl      = "private"
-}
-```
 
 #### Specifying Providers in Resources
 
@@ -254,16 +183,6 @@ By leveraging Terraform's multi-cloud support, you can manage resources across d
 
 ## Terraform Basics
 
-### Providers
-
-Providers are responsible for managing the lifecycle of a resource: create, read, update, delete. They determine how to communicate with the respective APIs and perform CRUD operations.
-
-```hcl
-provider "libvirt" {
-  uri = "qemu:///system"
-}
-```
-
 ### Resources
 
 Resources are the building blocks of your infrastructure. They define the desired state of a particular object, such as a virtual machine, network, or DNS record.
@@ -273,6 +192,16 @@ resource "libvirt_domain" "example" {
   name   = "terraform-vm"
   memory = "512"
   vcpu   = "1"
+}
+```
+
+### Providers
+
+Providers are responsible for managing the lifecycle of a resource: create, read, update, delete. They determine how to communicate with the respective APIs and perform CRUD operations.
+
+```hcl
+provider "libvirt" {
+  uri = "qemu:///system"
 }
 ```
 
@@ -289,6 +218,12 @@ variable "location" {
   default     = "eastus"
 }
 ```
+
+Show that you can constrain variables to default types in hcl
+or construct new objects with object()
+also show common types, aka string, map, list, map(map))
+
+show how you can validate variables and why is that importnat
 
 #### Using Variables in Resources
 
@@ -316,6 +251,8 @@ In the above example, we parameterized the location by using variables.
 ### Outputs
 
 Outputs allow you to extract and display information from your Terraform configuration after it has been applied. This is useful for retrieving IP addresses, resource IDs, or any other relevant data.
+
+It is most usefull for chaining modules togheter!! 
 
 #### Defining Outputs in `outputs.tf`
 
@@ -414,6 +351,8 @@ In the example above:
 
 Terraform supports a wide range of expressions for manipulating and referencing values within your configurations, such as arithmetic operations, string manipulation, and more.
 
+give more examples
+
 ```hcl
 resource "libvirt_domain" "example" {
   name   = "vm-${count.index}"
@@ -425,6 +364,8 @@ resource "libvirt_domain" "example" {
 ### Functions
 
 Terraform provides built-in functions for string manipulation, mathematical operations, and more.
+
+Give examples of most common functions
 
 ```hcl
 output "vm_names" {
@@ -473,6 +414,10 @@ instance_type = "t2.large"
 
 Load workspace-specific variables:
 
+Will this work? afaik you need the variables when you start tf, otherwise it will ask for them
+
+and how to do that is terraform plan -var-file env/dev.tfvars
+
 ```hcl
 locals {
   workspace_vars = try(file("${path.module}/${terraform.workspace}.tfvars"), {})
@@ -496,6 +441,10 @@ instance_type = local.workspace_vars.instance_type
 ### Modules
 
 Modules enable code reusability and allow you to organize your Terraform configurations into reusable components. They can be used to encapsulate and abstract complex configurations.
+
+Associate them with functions 
+input -> variables
+output -> returns
 
 #### Example Module: `instance`
 
@@ -547,6 +496,8 @@ Module names must be unique within your Terraform configurations to avoid confli
 
 ### Cloud-Init
 
+This needs to be in the Demo!!!
+
 Cloud-Init is a widely used approach to initialize cloud instances with user data. It's commonly used with virtual machines to automate the configuration process.
 
 ```hcl
@@ -557,6 +508,8 @@ resource "libvirt_cloudinit_disk" "example" {
 ```
 
 ### Network Configuration
+
+This needs to be in the Demo !!
 
 You can define network configurations to manage the networking settings of your virtual machines.
 
@@ -678,6 +631,12 @@ By utilizing these state management commands, you can inspect, modify, and sync 
 
 State file locking prevents concurrent runs that can lead to conflicts and inconsistencies in the infrastructure.
 
+What is the default behaviour?
+
+What happens when an apply is forcefull shut down?
+
+How to unlock the file?
+
 ```hcl
 terraform {
   lock {
@@ -698,6 +657,73 @@ variable "password" {
 ```
 
 ---
+
+### Multi-Cloud Support
+
+Terraform supports provisioning and managing resources across multiple cloud providers and on-premises environments using a single tool.
+
+#### Using Multiple `azurerm` Providers with Resources
+
+You can specify multiple `azurerm` providers in your Terraform configuration to manage resources across different Azure subscriptions. Below is an example that demonstrates how to use two `azurerm` providers to create resources in two different Azure Resource Groups (RGs):
+
+```hcl
+provider "azurerm" {
+  alias   = "subscription1"
+  features {}
+}
+
+provider "azurerm" {
+  alias   = "subscription2"
+  features {}
+}
+
+resource "azurerm_resource_group" "example" {
+  provider             = azurerm.subscription1
+  name                 = "example-resources-subscription1"
+}
+
+resource "azurerm_resource_group" "example_subscription2" {
+  provider             = azurerm.subscription2
+  name                 = "example-resources-subscription2"
+}
+```
+
+#### Using `azurerm` and `aws` Providers with Resources
+
+You can also use both `azurerm` and `aws` providers in the same Terraform configuration. Below is an example that demonstrates how to use one `aws` provider and two `azurerm` providers to manage resources across AWS and Azure:
+
+```hcl
+provider "azurerm" {
+  features {}
+}
+
+provider "aws" {
+}
+
+resource "azurerm_resource_group" "example" {
+  provider = azurerm
+  name     = "example-resources"
+}
+
+resource "aws_s3_bucket" "example" {
+  provider = aws
+  bucket   = "my-example-bucket"
+  acl      = "private"
+}
+```
+
+
+## need section on how to structure folders / project
+
+## need section on conditionals
+count = condition ? 1 : 0
+
+## need section on loops
+count list
+for_each map
+
+## need section on dynamic blocks
+When are they useful? eg having different settings depending on vars, eg check azurerm_linux_function site_config.application_stack
 
 ## Installation
 
