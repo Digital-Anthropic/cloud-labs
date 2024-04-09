@@ -126,8 +126,6 @@ terraform {
 
 For more information on configuring AWS S3 as a Terraform backend, refer to the [AWS S3 Backend Documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/backends/s3).
 
-By following these best practices and utilizing cloud storage solutions like Azure Storage Account or AWS S3 Bucket, you can effectively manage and share your Terraform state across developers and ensure consistency in your infrastructure deployments.
-
 ### Plan and Apply Workflow
 
 Terraform provides a series of commands to manage and apply your infrastructure configurations in a systematic manner. Below are the key steps involved in the Terraform workflow, from initializing your workspace to applying the configuration and checking the resources using `virsh`.
@@ -158,7 +156,7 @@ After reviewing the execution plan and ensuring everything looks correct, you ca
 terraform apply "plan"
 ```
 
-By following this `plan` and `apply` workflow, you can preview and apply changes to your infrastructure in a controlled and systematic manner, ensuring consistency and reliability in your Terraform deployments.
+By following this `plan` and `apply` workflow, you can preview and apply changes to your infrastructure.
 
 #### Apply Terraform Configuration
 
@@ -176,11 +174,9 @@ After successfully applying the Terraform configuration, you can use the `virsh`
 virsh list --all
 ```
 
-This workflow ensures a controlled and systematic approach to managing your infrastructure using Terraform, from initialization and planning to applying the configuration and verifying the created resources with `virsh`.
-
 ### Multi-Cloud Support
 
-Terraform supports provisioning and managing resources across multiple cloud providers and on-premises environments using a single tool. This provides flexibility and avoids vendor lock-in, allowing you to use the best services from different providers to meet your specific requirements.
+Terraform supports provisioning and managing resources across multiple cloud providers and on-premises environments using a single tool.
 
 #### Using Multiple `azurerm` Providers with Resources
 
@@ -206,7 +202,7 @@ resource "azurerm_resource_group" "example_subscription2" {
   provider             = azurerm.subscription2
   name                 = "example-resources-subscription2"
 }
-
+```
 
 #### Using `azurerm` and `aws` Providers with Resources
 
@@ -234,7 +230,7 @@ resource "aws_s3_bucket" "example" {
 
 #### Specifying Providers in Resources
 
-When using multiple providers, you can specify which provider to use for each resource using the `provider` attribute. This allows you to control which cloud provider or environment the resource belongs to.
+When using multiple providers, you can specify which provider to use for each resource using the `provider` attribute.
 
 ```hcl
 resource "azurerm_virtual_network" "vnet_westus" {
@@ -252,7 +248,7 @@ resource "aws_vpc" "example" {
 }
 ```
 
-By leveraging Terraform's multi-cloud support, you can manage resources across different cloud providers and environments using a unified and consistent approach, enabling you to optimize costs and meet specific requirements effectively.
+By leveraging Terraform's multi-cloud support, you can manage resources across different cloud providers and environments.
 
 ---
 
@@ -281,8 +277,6 @@ resource "libvirt_domain" "example" {
 ```
 
 ### Variables
-
-Variables allow you to parameterize your configurations, making them more reusable and flexible. They can be defined in separate `variables.tf` files or in the main configuration.
 
 #### Defining Variables in `variables.tf`
 
@@ -317,9 +311,7 @@ resource "azurerm_resource_group" "example_rg" {
 }
 ```
 
-In the example above, the `location` attribute of the `azurerm_resource_group` resource is set to the value of the `location` variable using `${var.location}`. This allows you to parameterize the resource configuration and easily change the Azure region where the resource group will be created by modifying the `location` variable value.
-
-By using variables in your Terraform configurations, you can create more reusable and flexible infrastructure code, making it easier to manage and maintain your infrastructure across different environments and configurations.
+In the above example, we parameterized the location by using variables.
 
 ### Outputs
 
@@ -352,7 +344,7 @@ The `terraform output` command will display the output in the terminal as follow
 vm_ip = "10.0.0.4"
 ```
 
-By utilizing outputs in your Terraform configurations, you can easily extract and display important information about your infrastructure, making it easier to manage and monitor your resources after they have been provisioned.
+By utilizing outputs in your Terraform configurations, you can easily extract and display important information about your infrastructure.
 
 ### Data Sources
 
@@ -382,8 +374,6 @@ In the example above:
 
 - The `azurerm_key_vault_secret` data source is used to fetch the secret named `my-secret` from an Azure Key Vault.
 - The `value` attribute of the `azurerm_key_vault_secret.example_secret` data source is used as the `admin_password` for an `azurerm_virtual_machine` resource.
-
-By leveraging data sources in your Terraform configurations, you can easily fetch information from external sources or existing infrastructure, enabling you to use that information to configure and provision resources in a more dynamic and flexible manner.
 
 ### Local Values
 
@@ -420,8 +410,6 @@ In the example above:
 - The `locals` block defines a `region_mapping` map that maps full region names to their corresponding region codes.
 - The `location` attribute of the `azurerm_virtual_machine.example` resource uses the `local.region_mapping["East US"]` local value to set the region code for the virtual machine to "eastus".
 
-By leveraging local values in your Terraform configurations, you can define intermediate values that can be reused throughout your configuration files, making it easier to manage and maintain your infrastructure code.
-
 ### Expressions
 
 Terraform supports a wide range of expressions for manipulating and referencing values within your configurations, such as arithmetic operations, string manipulation, and more.
@@ -436,7 +424,7 @@ resource "libvirt_domain" "example" {
 
 ### Functions
 
-Terraform provides built-in functions for string manipulation, mathematical operations, and more. These functions can be used within your configurations to generate or transform values.
+Terraform provides built-in functions for string manipulation, mathematical operations, and more.
 
 ```hcl
 output "vm_names" {
@@ -556,8 +544,6 @@ module "prod_instance" {
 ```
 
 Module names must be unique within your Terraform configurations to avoid conflicts. Ensure that each module has a distinct name when you include it multiple times in your configurations.
-
-By utilizing modules in your Terraform configurations, you can improve code organization, promote code reuse, and manage complex infrastructures more efficiently.
 
 ### Cloud-Init
 
@@ -686,7 +672,7 @@ The terraform state push command uploads the local state file to the backend.
 terraform state push
 ```
 
-By utilizing these state management commands, you can inspect, modify, and sync the state file to manage your infrastructure effectively with Terraform.
+By utilizing these state management commands, you can inspect, modify, and sync the state file to manage your infrastructure.
 
 ### Locking
 
@@ -778,4 +764,4 @@ LINK: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_arm
 
 ---
 
-By adopting Terraform and Infrastructure as Code practices, organizations can achieve improved agility, scalability, and consistency in managing their infrastructure, leading to faster development cycles, reduced costs, and increased operational efficiency.
+By adopting Terraform and Infrastructure as Code practices, organizations can achieve improved agility, scalability, and consistency in managing infrastructure.
