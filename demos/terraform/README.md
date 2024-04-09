@@ -184,30 +184,29 @@ Terraform supports provisioning and managing resources across multiple cloud pro
 
 #### Using Multiple `azurerm` Providers with Resources
 
-You can specify multiple `azurerm` providers in your Terraform configuration to manage resources across different Azure regions or subscriptions. Below is an example that demonstrates how to use two `azurerm` providers to create resources in two different Azure Resource Groups (RGs):
+You can specify multiple `azurerm` providers in your Terraform configuration to manage resources across different Azure subscriptions. Below is an example that demonstrates how to use two `azurerm` providers to create resources in two different Azure Resource Groups (RGs):
 
 ```hcl
 provider "azurerm" {
+  alias   = "subscription1"
   features {}
 }
 
 provider "azurerm" {
-  alias   = "eastus"
+  alias   = "subscription2"
   features {}
 }
 
-resource "azurerm_resource_group" "rg_westus" {
-  provider = azurerm
-  name     = "rg-westus"
-  location = "westus"
+resource "azurerm_resource_group" "example" {
+  provider             = azurerm.subscription1
+  name                 = "example-resources-subscription1"
 }
 
-resource "azurerm_resource_group" "rg_eastus" {
-  provider = azurerm.eastus
-  name     = "rg-eastus"
-  location = "eastus"
+resource "azurerm_resource_group" "example_subscription2" {
+  provider             = azurerm.subscription2
+  name                 = "example-resources-subscription2"
 }
-```
+
 
 #### Using `azurerm` and `aws` Providers with Resources
 
@@ -218,25 +217,12 @@ provider "azurerm" {
   features {}
 }
 
-provider "azurerm" {
-  alias   = "eastus"
-  features {}
-}
-
 provider "aws" {
-  region = "us-west-1"
 }
 
-resource "azurerm_resource_group" "rg_westus" {
+resource "azurerm_resource_group" "example" {
   provider = azurerm
-  name     = "rg-westus"
-  location = "westus"
-}
-
-resource "azurerm_resource_group" "rg_eastus" {
-  provider = azurerm.eastus
-  name     = "rg-eastus"
-  location = "eastus"
+  name     = "example-resources"
 }
 
 resource "aws_s3_bucket" "example" {
