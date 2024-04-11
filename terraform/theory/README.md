@@ -1,24 +1,16 @@
 # Terraform and Infrastructure as Code (IAC) Documentation
 
-
 ## Introduction
 
 Terraform is an open-source Infrastructure as Code (IAC) tool created by HashiCorp. It allows you to define and provision infrastructure using a declarative configuration language. This documentation provides an overview of Terraform, its components, the benefits of adopting Infrastructure as Code practices and also how to get started with the code provided.
 
-What is terraform at the core? a reconciler; how do we explain this?
-
-We ask ourselves how do we know the current state of the infra is the right one?
-Or what is the source of truth?
-
-And terraform basically reconciles the source of truth and we will see below what that is, with the actual setup in cloud.
-
+In essence, Terraform acts as a reconciler by comparing the desired state of your infrastructure (defined in Terraform configuration files) with the actual state in the cloud. It then takes actions to reconcile any differences, ensuring that the infrastructure remains consistent, auditable, and automated. The desired state serves as the source of truth, guiding Terraform's reconciliation process to maintain the integrity and reliability of your cloud infrastructure.
 
 ## Table of Contents
 
 1. [Infrastructure as Code (IAC)](#infrastructure-as-code-iac)
     - [Benefits of IAC](#benefits-of-iac)
 2. [Terraform Overview](#terraform-overview)
-    - [Declarative Configuration](#declarative-configuration)
     - [State Management](#state-management)
     - [Plan and Apply Workflow](#plan-and-apply-workflow)
     - [Multi-Cloud Support](#multi-cloud-support)
@@ -29,13 +21,11 @@ And terraform basically reconciles the source of truth and we will see below wha
     - [Outputs](#outputs)
     - [Data Sources](#data-sources)
     - [Local Values](#local-values)
-    - [Expressions](#expressions)
-    - [Functions](#functions)
+    - [Basic Expressions](#basic-expressions)
+    - [Advanced Expressions](#advanced-expressions)
     - [Provisioners](#provisioners)
     - [terraform.tfvars](#terraformtfvars)
     - [Modules](#modules)
-    - [Cloud-Init](#cloud-init)
-    - [Network Configuration](#network-configuration)
     - [Provider and Module Installation](#provider-and-module-installation)
     - [Workspaces](#workspaces)
     - [State Management Commands](#state-management-commands)
@@ -43,12 +33,9 @@ And terraform basically reconciles the source of truth and we will see below wha
     - [Sensitive Data](#sensitive-data)
 4. [Installation](#installation)
 
-## Start the same with a problem statement. Why do we need terraform? What are the pain points of not using IaC?
-   People need to understand what issue they are trying to solve
-
 ## Infrastructure as Code (IaC)
 
-Infrastructure as Code (IaC) is a key concept in modern DevOps and cloud computing practices. It refers to the process of managing and provisioning infrastructure using code and automation rather than manual processes.
+Managing cloud infrastructure without Infrastructure as Code (IaC) leads to challenges such as inconsistency across environments, human errors, difficulties in version control, scalability issues, and limited automation. Terraform serves as a powerful example of IaC, automating infrastructure provisioning and management by allowing you to define the desired state of your infrastructure in configuration files. This approach ensures consistency, reliability, and efficiency in infrastructure operations, addressing the pain points associated with manual infrastructure management.
 
 ### Benefits of IAC
 
@@ -57,12 +44,21 @@ Infrastructure as Code (IaC) is a key concept in modern DevOps and cloud computi
 - **Code Repositories**: Store infrastructure code in version control systems like Git, enabling versioning, history tracking, and collaboration.
 - **Code Reviews**: Implement code review practices to ensure quality, security, and compliance of infrastructure code changes.
 
-#### Consistency and Reproducibility
+#### Consistency, Reproducibility and Rollbacks
 
 - **Consistent Deployments**: Ensure consistent and repeatable deployments across different environments (development, staging, production) by using code to define infrastructure.
 - **Environment Parity**: Maintain consistent configurations between development, testing, and production environments to reduce discrepancies and deployment issues.
+- **Reproducibility**: Achieve reproducible infrastructure deployments by version-controlling your Terraform configurations and modules. This allows you to roll back to previous configurations in case of issues or to replicate specific infrastructure states.
 
-Where is the reproducibility? talk about rollbacks? how did we manage rollbacks before IaC? hard, very hard, you can't expect to remember all tiny bits and pieces you changed
+##### Importance of Reproducibility and Rollbacks
+
+Before Infrastructure as Code (IaC), managing rollbacks was hard and error-prone. It was challenging to remember all the tiny bits and pieces that were changed manually, making it difficult to revert to a previous state reliably.
+
+With IaC, you can leverage version control systems like Git to track changes to your infrastructure configurations over time. This enables you to:
+
+- Easily roll back to previous versions of your infrastructure configurations.
+- Reproduce specific infrastructure states for debugging, testing, or auditing purposes.
+- Ensure consistent and reliable deployments by reverting to known good states in case of issues.
 
 #### Automation and Efficiency
 
@@ -219,13 +215,86 @@ variable "location" {
 }
 ```
 
-Show that you can constrain variables to default types in hcl
-or construct new objects with object()
-also show common types, aka string, map, list, map(map))
+##### Defining Variables with Default Types
 
-show how you can validate variables and why is that importnat
+You can constrain variables to default types in HCL (HashiCorp Configuration Language) such as `string`, `number`, `bool`, `list`, `map`, etc.
 
-#### Using Variables in Resources
+###### Example of Location Variable
+
+```hcl
+variable "location" {
+  description = "The Azure region where resources will be created"
+  type        = string
+  default     = "eastus"
+}
+```
+
+##### Example of Virtual Machine Configuration Object
+
+```hcl
+variable "vm_config" {
+  description = "Virtual machine configuration"
+  type        = object({
+    name     = string
+    size     = string
+    os_disk  = map(string)
+    data_disks = list(map(string))
+  })
+  default = {
+    name     = "my-vm"
+    size     = "Standard_DS1_v2"
+    os_disk  = {
+      storage_account_type = "Premium_LRS"
+      disk_size_gb         = "128"
+    }
+    data_disks = [
+      {
+        storage_account_type = "Premium_LRS"
+        disk_size_gb         = "128"
+      },
+      {
+        storage_account_type = "Premium_LRS"
+        disk_size_gb         = "256"
+      }
+    ]
+  }
+}
+```
+
+##### Common Variable Types
+
+- **String**: `type = string`
+- **Map**: `type = map(string)`
+- **List**: `type = list(string)`
+- **Map of Maps**: `type = map(map(string))`
+
+##### Validating Variables
+
+Validating variables is crucial to ensure that the provided values meet certain criteria or constraints. You can use the `validation` block to enforce validation rules on variables.
+
+###### Example: Validating VM Size
+
+```hcl
+variable "vm_size" {
+  description = "Virtual machine size"
+  type        = string
+
+  validation {
+    condition     = length(var.vm_size) > 0
+    error_message = "The VM size must not be empty."
+  }
+}
+```
+
+### Why Validating Variables is Important
+
+- **Data Integrity**: Ensures that the data provided for variables is valid and consistent.
+- **Error Prevention**: Helps prevent misconfigurations and potential issues during resource provisioning.
+- **Improved Debugging**: Provides clear error messages when validation rules are not met, aiding in troubleshooting.
+
+By leveraging Terraform's variable capabilities, including type constraints, object construction, and validation, you can create more robust, flexible, and maintainable infrastructure as code configurations.
+
+### Using Variables in Resources
 
 Once a variable is defined, you can reference it within resources using the `${var.variable_name}` syntax. Here's an example that demonstrates how to use the `location` variable in an `azurerm_resource_group` resource:
 
@@ -250,9 +319,7 @@ In the above example, we parameterized the location by using variables.
 
 ### Outputs
 
-Outputs allow you to extract and display information from your Terraform configuration after it has been applied. This is useful for retrieving IP addresses, resource IDs, or any other relevant data.
-
-It is most usefull for chaining modules togheter!! 
+Outputs allow you to extract and display information from your Terraform configuration after it has been applied. This is useful for retrieving IP addresses, resource IDs, or any other relevant data. Outputs are most useful for chaining modules together. By using outputs from one module as inputs to another, you can create a modular and interconnected infrastructure configuration, enhancing reusability and maintainability.
 
 #### Defining Outputs in `outputs.tf`
 
@@ -347,29 +414,101 @@ In the example above:
 - The `locals` block defines a `region_mapping` map that maps full region names to their corresponding region codes.
 - The `location` attribute of the `azurerm_virtual_machine.example` resource uses the `local.region_mapping["East US"]` local value to set the region code for the virtual machine to "eastus".
 
-### Expressions
+### Basic Expressions
 
-Terraform supports a wide range of expressions for manipulating and referencing values within your configurations, such as arithmetic operations, string manipulation, and more.
+#### Arithmetic Operations
 
-give more examples
+You can perform basic arithmetic operations in Terraform using expressions.
+
+```hcl
+variable "memory" {
+  description = "The memory size for the VM in MB"
+  type        = number
+  default     = 1024
+}
+
+resource "libvirt_domain" "example" {
+  name   = "vm-${count.index}"
+  memory = var.memory * 2  # Doubles the memory size
+  vcpu   = "1"
+}
+```
+
+#### String Manipulation
+
+String manipulation functions allow you to modify and concatenate strings.
 
 ```hcl
 resource "libvirt_domain" "example" {
   name   = "vm-${count.index}"
   memory = var.memory
   vcpu   = "1"
+  hostname = "vm-${count.index}.example.com"  # Concatenates strings
 }
 ```
 
-### Functions
+### Conditional Expressions
 
-Terraform provides built-in functions for string manipulation, mathematical operations, and more.
-
-Give examples of most common functions
+Terraform supports conditional expressions to handle conditional logic within your configurations.
 
 ```hcl
-output "vm_names" {
-  value = join(",", libvirt_domain.example.*.name)
+resource "libvirt_domain" "example" {
+  name   = "vm-${count.index}"
+  memory = var.memory
+  vcpu   = "1"
+  enabled = count.index % 2 == 0  # Enables every other VM
+}
+```
+
+### Advanced Expressions
+
+#### List Functions
+
+You can use list functions to manipulate and iterate over lists.
+
+```hcl
+variable "disk_sizes" {
+  description = "List of disk sizes in GB"
+  type        = list(number)
+  default     = [128, 256, 512]
+}
+
+resource "libvirt_domain" "example" {
+  name   = "vm-${count.index}"
+  memory = var.memory
+  vcpu   = "1"
+  disk_size_gb = var.disk_sizes[count.index % length(var.disk_sizes)]
+}
+```
+
+#### Map Functions
+
+Map functions allow you to manipulate and iterate over maps.
+
+```hcl
+variable "networks" {
+  description = "Map of network configurations"
+  type        = map(object({
+    cidr_block = string
+    gateway    = string
+  }))
+  default = {
+    internal = {
+      cidr_block = "10.0.1.0/24"
+      gateway    = "10.0.1.1"
+    },
+    external = {
+      cidr_block = "192.168.1.0/24"
+      gateway    = "192.168.1.1"
+    }
+  }
+}
+
+resource "libvirt_domain" "example" {
+  name   = "vm-${count.index}"
+  memory = var.memory
+  vcpu   = "1"
+  network_config = var.networks[count.index % length(var.networks)]
 }
 ```
 
@@ -414,37 +553,28 @@ instance_type = "t2.large"
 
 Load workspace-specific variables:
 
-Will this work? afaik you need the variables when you start tf, otherwise it will ask for them
+*Note* Variable Loading
 
-and how to do that is terraform plan -var-file env/dev.tfvars
+It's important to note that when you initiate Terraform (terraform init), it does not load workspace-specific tfvars files automatically. You need to specify the variable file using the -var-file flag when running terraform plan, terraform apply, or terraform validate.
 
-```hcl
-locals {
-  workspace_vars = try(file("${path.module}/${terraform.workspace}.tfvars"), {})
-}
+To specify a workspace-specific tfvars file, you can use the -var-file flag as follows:
+
+```bash
+terraform plan -var-file=env/dev.tfvars
 ```
 
-Set common variables:
-
-```hcl
-region     = "us-west-1"
-dns_domain = "example.com"
-```
-
-Set workspace-specific variables:
-
-```hcl
-environment   = local.workspace_vars.environment
-instance_type = local.workspace_vars.instance_type
-```
+This will load the variables from env/dev.tfvars and use them in your Terraform operations.
 
 ### Modules
 
 Modules enable code reusability and allow you to organize your Terraform configurations into reusable components. They can be used to encapsulate and abstract complex configurations.
 
-Associate them with functions 
-input -> variables
-output -> returns
+#### Associating Modules with Functions
+
+When thinking about Terraform modules, you can associate them with functions in programming:
+
+- **Input** in functions corresponds to **variables** in Terraform modules.
+- **Output** in functions corresponds to **returns** in Terraform modules.
 
 #### Example Module: `instance`
 
@@ -493,33 +623,6 @@ module "prod_instance" {
 ```
 
 Module names must be unique within your Terraform configurations to avoid conflicts. Ensure that each module has a distinct name when you include it multiple times in your configurations.
-
-### Cloud-Init
-
-This needs to be in the Demo!!!
-
-Cloud-Init is a widely used approach to initialize cloud instances with user data. It's commonly used with virtual machines to automate the configuration process.
-
-```hcl
-resource "libvirt_cloudinit_disk" "example" {
-  name    = "cloud-init-disk"
-  user_data = file("cloudinit.cfg")
-}
-```
-
-### Network Configuration
-
-This needs to be in the Demo !!
-
-You can define network configurations to manage the networking settings of your virtual machines.
-
-```hcl
-resource "libvirt_network" "example" {
-  name = "terraform-network"
-  mode = "nat"
-  xml_config = file("network_config.cfg")
-}
-```
 
 ### Provider and Module Installation
 
@@ -629,13 +732,7 @@ By utilizing these state management commands, you can inspect, modify, and sync 
 
 ### Locking
 
-State file locking prevents concurrent runs that can lead to conflicts and inconsistencies in the infrastructure.
-
-What is the default behaviour?
-
-What happens when an apply is forcefull shut down?
-
-How to unlock the file?
+State file locking in Terraform prevents concurrent runs that can lead to conflicts and inconsistencies in the infrastructure. It ensures that only one Terraform operation can modify the state at a time, thereby maintaining consistency and integrity.
 
 ```hcl
 terraform {
@@ -643,6 +740,22 @@ terraform {
     enabled = true
   }
 }
+```
+
+#### Default Behavior
+
+The default behavior for state file locking in Terraform is to lock the state file automatically when performing operations like `terraform apply` or `terraform plan`.
+
+#### Behavior During Forceful Shutdown
+
+When a `terraform apply` or `terraform plan` operation is forcefully shut down (e.g., by using `Ctrl+C`), the state file remains locked for a certain period to prevent concurrent modifications. The duration of this lock can be configured using the `-lock-timeout` flag.
+
+#### Unlocking the State File
+
+If for some reason the state file remains locked and you need to unlock it manually, you can use the following command:
+
+```bash
+terraform force-unlock LOCK_ID
 ```
 
 ### Sensitive Data
@@ -712,18 +825,111 @@ resource "aws_s3_bucket" "example" {
 }
 ```
 
+### need section on how to structure folders / project
 
-## need section on how to structure folders / project
+Organizing your Terraform code into a structured folder and project layout can help maintainability and readability. Here's a recommended folder structure:
 
-## need section on conditionals
-count = condition ? 1 : 0
+```css
+terraform-project/
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── modules/
+│   ├── s3_bucket/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── ...
+├── environments/
+│   ├── prod/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── dev/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+└── ...
 
-## need section on loops
-count list
-for_each map
+```
 
-## need section on dynamic blocks
-When are they useful? eg having different settings depending on vars, eg check azurerm_linux_function site_config.application_stack
+### Conditionals in Terraform
+
+You can use conditionals in Terraform to control resource creation based on certain conditions. The syntax for conditionals is as follows:
+
+```hcl
+resource "aws_instance" "example" {
+  count = var.create_instance ? 1 : 0
+}
+```
+
+### Loops in Terraform
+
+#### Using count with Lists
+
+You can use the count parameter to create multiple instances of a resource based on a list:
+
+```hcl
+variable "instance_names" {
+  type    = list(string)
+  default = ["instance1", "instance2"]
+}
+
+resource "aws_instance" "example" {
+  count = length(var.instance_names)
+
+  tags = {
+    Name = var.instance_names[count.index]
+  }
+}
+```
+
+#### Using for_each with Maps
+
+You can use the for_each parameter to create multiple instances of a resource based on a map:
+
+```hcl
+variable "instance_map" {
+  type = map(string)
+  default = {
+    instance1 = "ami-12345678"
+    instance2 = "ami-87654321"
+  }
+}
+
+resource "aws_instance" "example" {
+  for_each = var.instance_map
+
+  ami           = each.value
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = each.key
+  }
+}
+```
+
+### Dynamic Blocks in Terraform
+
+Dynamic blocks in Terraform allow you to include multiple configurations within a single resource block based on certain conditions or variables.
+
+```hcl
+resource "azurerm_linux_function_app" "example" {
+  name                       = "example-function-app"
+  location                   = "West Europe"
+  resource_group_name        = azurerm_resource_group.example.name
+  app_service_plan_id        = azurerm_app_service_plan.example.id
+  storage_account_name       = azurerm_storage_account.example.name
+  storage_account_access_key = azurerm_storage_account.example.primary_access_key
+
+  dynamic "site_config" {
+    for_each = var.is_linux ? [1] : []
+    content {
+      linux_fx_version = "DOCKER|nginx:latest"
+    }
+  }
+}
+```
 
 ## Installation
 
