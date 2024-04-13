@@ -2,73 +2,127 @@
 
 ## Introduction
 
-Terraform is an open-source Infrastructure as Code (IAC) tool created by HashiCorp. It allows you to define and provision infrastructure using a declarative configuration language. This documentation provides an overview of Terraform, its components, the benefits of adopting Infrastructure as Code practices and also how to get started with the code provided.
+Terraform is an open-source Infrastructure as Code (IAC) tool created by
+HashiCorp.
 
-In essence, Terraform acts as a reconciler by comparing the desired state of your infrastructure (defined in Terraform configuration files) with the actual state in the cloud. It then takes actions to reconcile any differences, ensuring that the infrastructure remains consistent, auditable, and automated. The desired state serves as the source of truth, guiding Terraform's reconciliation process to maintain the integrity and reliability of your cloud infrastructure.
+It allows you to define and provision infrastructure using a declarative
+configuration language.
+
+This documentation provides an overview of Terraform, its components,
+the benefits of adopting Infrastructure as Code practices and also how to
+get started with the code provided.
+
+In essence, Terraform acts as a reconciler between the current state of
+infrastructure(kept in tf state, usually in the cloud) and the desired
+infrastructure(terraform configuration files).
+
+Planning shows you the required actions to move from current state to
+desired state and Apply actually performs these changes.
 
 ## Table of Contents
+
+Add to advanced:
+- tf import
+- moved {to from} aka refactoring
+- depends on
+- lifecycle {ingnore_changes, etc}
+
+Make sure this table is up to date!
+
+Make all code examples respect the coding standards written down
+
+use set colorcolumn=80
+
+instead of putting <enter> aka new paragraph you can use "  " aka two spaces
+at end of line to write just under it.
+
+use :set list and check terraform init example, it looks really bad in the
+parsed markdown
+
 
 1. [Infrastructure as Code (IAC)](#infrastructure-as-code-iac)
     - [Benefits of IAC](#benefits-of-iac)
 2. [Terraform Overview](#terraform-overview)
     - [State Management](#state-management)
-    - [Plan and Apply Workflow](#plan-and-apply-workflow)
-    - [Multi-Cloud Support](#multi-cloud-support)
+    - [Generic Terraform Workflow](#generic-terraform-workflow)
+    - [Terraform Context](#terraform-context)
+    - [Terraform Coding Guidelines](#terraform-coding-guidelines)
 3. [Terraform Basics](#terraform-basics)
-    - [Providers](#providers)
     - [Resources](#resources)
+    - [Providers](#providers)
     - [Variables](#variables)
     - [Outputs](#outputs)
+    - [Sensitive Data](#sensitive-data)
     - [Data Sources](#data-sources)
     - [Local Values](#local-values)
     - [Basic Expressions](#basic-expressions)
-    - [Advanced Expressions](#advanced-expressions)
-    - [Provisioners](#provisioners)
     - [terraform.tfvars](#terraformtfvars)
     - [Modules](#modules)
     - [Provider and Module Installation](#provider-and-module-installation)
     - [Workspaces](#workspaces)
     - [State Management Commands](#state-management-commands)
     - [Locking](#locking)
-    - [Sensitive Data](#sensitive-data)
-4. [Installation](#installation)
+4. [Terraform Advanced](#terraform-advanced)
+    - [Advanced Expressions](#advanced-expressions)
+    - [Provisioners](#provisioners)
+    - [Multi-Cloud Support](#multi-cloud-support)
+5. [Installation](#installation)
 
 ## Infrastructure as Code (IaC)
 
-Managing cloud infrastructure without Infrastructure as Code (IaC) leads to challenges such as inconsistency across environments, human errors, difficulties in version control, scalability issues, and limited automation. Terraform serves as a powerful example of IaC, automating infrastructure provisioning and management by allowing you to define the desired state of your infrastructure in configuration files. This approach ensures consistency, reliability, and efficiency in infrastructure operations, addressing the pain points associated with manual infrastructure management.
+Managing cloud infrastructure without Infrastructure as Code (IaC) leads
+to challenges such as:
+- inconsistency across environments
+- human errors
+- scalability issues
+- no automation
+
+Terraform serves as a powerful example of IaC, automating infrastructure
+provisioning and management by allowing you to define your infrastructure
+in configuration files.
+
+This approach addresses the pain points associated with manual infrastructure
+management.
 
 ### Benefits of IAC
 
 #### Version Control
 
-- **Code Repositories**: Store infrastructure code in version control systems like Git, enabling versioning, history tracking, and collaboration.
-- **Code Reviews**: Implement code review practices to ensure quality, security, and compliance of infrastructure code changes.
+- **Code Repositories**: Store infrastructure code in version control systems
+like Git, enabling versioning, history tracking, and collaboration.
+- **Code Reviews**: Implement code review practices to ensure quality,
+security, and compliance of infrastructure code changes.
 
 #### Consistency, Reproducibility and Rollbacks
 
-- **Consistent Deployments**: Ensure consistent and repeatable deployments across different environments (development, staging, production) by using code to define infrastructure.
-- **Environment Parity**: Maintain consistent configurations between development, testing, and production environments to reduce discrepancies and deployment issues.
-- **Reproducibility**: Achieve reproducible infrastructure deployments by version-controlling your Terraform configurations and modules. This allows you to roll back to previous configurations in case of issues or to replicate specific infrastructure states.
+- **Consistent Deployments**: Ensure consistent and repeatable infrastructure
+- **Environment Parity**: Bring developers/qa closer to production environment
+- **Reusable Components**: Create reusable infrastructure code modules and
+templates that improve productivity and standardization
+- **Reproducibility**: Can do rollbacks
 
 ##### Importance of Reproducibility and Rollbacks
 
-Before Infrastructure as Code (IaC), managing rollbacks was hard and error-prone. It was challenging to remember all the tiny bits and pieces that were changed manually, making it difficult to revert to a previous state reliably.
+Before IaC, managing rollbacks was hard and error-prone.
+It was challenging to keep track of the tiny bits and pieces that were changed
+manually, making it difficult to revert to a previous state reliably.
 
-With IaC, you can leverage version control systems like Git to track changes to your infrastructure configurations over time. This enables you to:
+With IaC, you can leverage version control systems like Git to track
+changes to your infrastructure configurations over time. This enables you to:
 
 - Easily roll back to previous versions of your infrastructure configurations.
-- Reproduce specific infrastructure states for debugging, testing, or auditing purposes.
-- Ensure consistent and reliable deployments by reverting to known good states in case of issues.
+- Reproduce specific infrastructure states for debugging, testing, or auditing
+purposes.
 
-#### Automation and Efficiency
+#### Scaling
 
-- **Automated Provisioning**: Automate the provisioning, configuration, and management of infrastructure, reducing manual intervention and human errors.
-- **Efficient Scaling**: Dynamically scale infrastructure resources to handle increased workload demands, improving performance and reliability.
+- **Efficient Scaling**: Easier scaling of infrastructure resources to handle
+increased workload demands, improving customer satisfaction
 
 #### Collaboration and Knowledge Sharing
 
-- **Shared Understanding**: Facilitate collaboration between development, operations, and other teams by using a common language and approach to define infrastructure.
-- **Reusable Components**: Create reusable infrastructure code modules and templates that can be shared across teams and projects to improve productivity and standardization.
+- **Shared Understanding**: Facilitate collaboration across ops teams.
+No single point of failure(human)
 
 ---
 
@@ -76,17 +130,27 @@ With IaC, you can leverage version control systems like Git to track changes to 
 
 ### State Management
 
-Terraform maintains a consistent state of your infrastructure by tracking changes and dependencies between resources. The `tfstate` file stores the current state of your infrastructure, allowing Terraform to understand which resources need to be created, updated, or destroyed.
+Terraform maintains a consistent state of your infrastructure by tracking
+changes and dependencies between resources.
+
+The `tfstate` file stores the current state of your infrastructure,
+allowing Terraform to understand which resources need to be created,
+updated, or destroyed.
 
 #### Best Practices for State Management
 
-- **Secure Storage**: Ensure the `tfstate` file is stored securely to protect sensitive information. Avoid storing it in public repositories.
-- **Collaboration**: For team-based projects, storing the state file in a shared location enables collaboration and ensures that all team members are working with the same infrastructure state.
-- **Backup**: Regularly backup the state file to prevent data loss in case of accidental deletion or corruption.
+- **Secure Storage**: Ensure the `tfstate` file is stored securely to protect
+sensitive information. Avoid storing it in public repositories.
+- **Collaboration**: For team-based projects, storing the state file in a
+shared location ensures that all team members are working with the
+same infrastructure.
+- **Backup**: Regularly backup the state file to prevent data loss in case
+of accidental deletion or corruption.
 
 #### Storing Terraform State in Azure Storage Account
 
-To store the Terraform state file in an Azure Storage Account, you can use the following backend configuration:
+To store the Terraform state file in an Azure Storage Account,
+you can use the following backend configuration:
 
 ```hcl
 terraform {
@@ -99,11 +163,13 @@ terraform {
 }
 ```
 
-For more information on configuring Azure Storage as a Terraform backend, refer to the [AzureRM Backend Documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/backend).
+For more information on configuring Azure Storage as a Terraform backend,
+refer to the [AzureRM Backend Documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/backend).
 
 #### Storing Terraform State in AWS S3 Bucket
 
-To store the Terraform state file in an AWS S3 Bucket, you can use the following backend configuration:
+To store the Terraform state file in an AWS S3 Bucket, you can use the
+following backend configuration:
 
 ```hcl
 terraform {
@@ -117,63 +183,184 @@ terraform {
 }
 ```
 
-For more information on configuring AWS S3 as a Terraform backend, refer to the [AWS S3 Backend Documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/backends/s3).
+For more information on configuring AWS S3 as a Terraform backend, refer to the
+[AWS S3 Backend Documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/backends/s3).
 
-### Plan and Apply Workflow
+### State Management Commands
 
-Terraform provides a series of commands to manage and apply your infrastructure configurations in a systematic manner. Below are the key steps involved in the Terraform workflow, from initializing your workspace to applying the configuration and checking the outputs(if there are any).
+Terraform provides commands to manage the state file, which tracks the current
+state of your infrastructure managed by Terraform.
 
-#### Initialize Terraform Workspace
+You can use the following commands to interact with the state file:
 
-Before applying any Terraform configurations, it's essential to initialize the Terraform workspace.
+#### List Resources in State File
 
-This step downloads the required provider plugins and initializes the backend and installs any required modules.
-
-```bash
-terraform init
-```
-
-#### Preview Infrastructure Changes with `terraform plan`
-
-The `terraform plan` command is used to generate an execution plan that describes the actions Terraform will take to achieve the desired state defined in your configuration files. This plan helps you understand the changes that will be applied to your infrastructure without actually making any modifications.
+The `terraform state list` command displays a list of all resources that are
+currently being managed by Terraform.
 
 ```bash
-terraform plan -out=plan
+terraform state list
 ```
+
+#### Show Resource Details
+
+The terraform state show command displays detailed information about a
+specific resource in the state file.
+
+```bash
+terraform state show aws_instance.example
+```
+
+#### Remove Resource from State File
+
+The terraform state rm command removes a resource from the state file. Use this command with caution, as it will not destroy the actual resource, but only remove it from the state file.
+
+```bash
+terraform state rm aws_instance.example
+```
+
+#### Pull Current State
+
+The terraform state pull command fetches the current state from the backend and writes it to a file.
+
+```bash
+terraform state pull > terraform.tfstate
+```
+
+#### Push Local State to Backend
+
+The terraform state push command uploads the local state file to the backend.
+
+```bash
+terraform state push
+```
+
+By utilizing these state management commands, you can inspect, modify, and sync the state file to manage your infrastructure.
+
+### Locking
+
+State file locking in Terraform prevents concurrent runs that can lead to conflicts and inconsistencies in the infrastructure.
+It ensures that only one Terraform client can modify the state at a time.
+
+```hcl
+terraform {
+  lock {
+    enabled = true
+  }
+}
+```
+
+#### Default Behavior
+
+The default behavior for state file locking in Terraform is to lock the state file automatically when performing operations like `terraform apply` or `terraform plan`.
+
+#### Behavior During Forceful Shutdown
+
+When a `terraform apply` or `terraform plan` operation is forcefully shut down (e.g., by using `Ctrl+C`), the state file remains locked for a certain period to prevent concurrent modifications.
+The duration of this lock can be configured using the `-lock-timeout` flag.
+
+#### Unlocking the State File
+
+If for some reason the state file remains locked and you need to unlock it manually, you can use the following command:
+
+```bash
+terraform force-unlock LOCK_ID
+```
+
+### Generic Terraform Workflow
+
+Terraform provides a series of commands to manage and apply your infrastructure configurations in a systematic manner.
+
+- terraform init
+- terraform validate
+- terraform plan -out this.plan
+- terraform apply this.plan
+
+#### Initialize Terraform Workspace `terraform init`
+
+Before applying any Terraform configurations, it's essential to initialize the Terraform workspace.  
+This step downloads the required provider plugins and initializes the backend and installs any required modules.  
+It is also required to upgrade providers and modules.
+
+#### Validate Terraform code `terraform validate`
+
+A good practice, before running plan is to run validate.
+
+Validate does not query any remote services.
+It just ensures syntactic consistency of providers and modules.
+
+It enables you to catch quick easy bugs without the lengthy process of plan
+
+#### Plan Infrastructure Changes `terraform plan`
+
+Planning will actually go and query the remote services and compare them with the current known state.
+
+It is by far the most time consuming terraform operation(excluding the creation of whole infra from scratch).
+
+It generates for us the changes required to move from the state to the desired state.
+
+It won't perform any infra changes.
 
 The `-out` flag allows you to save the generated plan to a file named `plan`, which can be used later with `terraform apply`.
 
 #### Apply Infrastructure Changes with `terraform apply`
 
-After reviewing the execution plan and ensuring everything looks correct, you can apply the changes to your infrastructure using the `terraform apply` command. This command reads the saved plan from the `plan` file and applies the changes to provision or update your infrastructure accordingly.
-
-```bash
-terraform apply "plan"
-```
+After reviewing the execution plan and ensuring everything looks correct, you can apply the changes to your infrastructure using the `terraform apply` command.
+This command reads the saved plan from the `plan` file and applies the changes to provision or update your infrastructure accordingly.
 
 By following this `plan` and `apply` workflow, you can preview and apply changes to your infrastructure.
 
-#### Specifying Providers in Resources
+### Terraform Context
 
-When using multiple providers, you can specify which provider to use for each resource using the `provider` attribute.
+Which files does Terraform know to include? or discard when running the above commands?
 
-```hcl
-resource "azurerm_virtual_network" "vnet_westus" {
-  provider            = azurerm
-  name                = "vnet-westus"
-  resource_group_name = azurerm_resource_group.rg_westus.name
-  location            = azurerm_resource_group.rg_westus.location
-}
+They made it simple for us.
+Everything ending in .tf in the current working directory is lumped togheter and interpreted at once.
 
-resource "aws_vpc" "example" {
-  provider             = aws
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_support   = true
-  enable_dns_hostnames = true
-}
+This makes it rather easy to organize tf code likewise:
+
+```
+main.tf      # bulk of the resources
+variables.tf # think of these as function inputs for your tf code
+locals.tf    # these would be variables declared in the function context
+data.tf      # when we want to query remote services
+output.tf    # return variables
 ```
 
-By leveraging Terraform's multi-cloud support, you can manage resources across different cloud providers and environments.
+This is a generic example that is popular in the industry.
+There are multiple ways on how to organize code, no one size fits all.
+
+Key take away is terraform merges `./*.tf` files togheter and interprets them at once.
+
+### Terraform Coding Guidelines
+
+Tabs as 2 spaces.
+
+Example module instantiation:
+
+```hcl
+module "network" {
+  source = "path/to/source" # the source definition always sits at the very top so we know what we run
+
+  for_each/count = var.networks # loops are second
+
+  parameter1       = value1 # parameters are third
+  parameterlonger2 = value2 # when we have a block of parameters we alliniate = for readability
+  ...
+  parametern       = valuen
+
+  blocks_come_next { # blocks next
+    block_parameter1 = value1
+    block_parameter2 = value2
+  }
+
+  lifecycle { # lifecycle tag is the last but one
+    ignore_changes = []
+  }
+
+  depends_on = [] # depends on[building dependency between modules/resources] is the last one
+}
+```
 
 ---
 
@@ -215,11 +402,11 @@ variable "location" {
 }
 ```
 
-##### Defining Variables with Default Types
+#### Defining Variables with Default Types
 
 You can constrain variables to default types in HCL (HashiCorp Configuration Language) such as `string`, `number`, `bool`, `list`, `map`, etc.
 
-###### Example of Location Variable
+#### Example of Location Variable
 
 ```hcl
 variable "location" {
@@ -229,7 +416,7 @@ variable "location" {
 }
 ```
 
-##### Example of Virtual Machine Configuration Object
+#### Example of Virtual Machine Configuration Object
 
 ```hcl
 variable "vm_config" {
@@ -261,18 +448,28 @@ variable "vm_config" {
 }
 ```
 
-##### Common Variable Types
+#### Common Variable Types
 
 - **String**: `type = string`
 - **Map**: `type = map(string)`
 - **List**: `type = list(string)`
 - **Map of Maps**: `type = map(map(string))`
+- **Object**:
+```hcl
+type = list(object({
+  create     = bool
+  name       = string
+  properties = map(string)
+}))
+```
 
-##### Validating Variables
+Object allows us to bind together different types in a logical component.
+
+#### Validating Variables
 
 Validating variables is crucial to ensure that the provided values meet certain criteria or constraints. You can use the `validation` block to enforce validation rules on variables.
 
-###### Example: Validating VM Size
+Example: Validating VM Size
 
 ```hcl
 variable "vm_size" {
@@ -286,7 +483,7 @@ variable "vm_size" {
 }
 ```
 
-### Why Validating Variables is Important
+#### Why Validating Variables is Important
 
 - **Data Integrity**: Ensures that the data provided for variables is valid and consistent.
 - **Error Prevention**: Helps prevent misconfigurations and potential issues during resource provisioning.
@@ -294,21 +491,21 @@ variable "vm_size" {
 
 By leveraging Terraform's variable capabilities, including type constraints, object construction, and validation, you can create more robust, flexible, and maintainable infrastructure as code configurations.
 
-### Using Variables in Resources
+#### Using Variables in Resources
 
 Once a variable is defined, you can reference it within resources using the `${var.variable_name}` syntax. Here's an example that demonstrates how to use the `location` variable in an `azurerm_resource_group` resource:
 
-```hcl
-provider "azurerm" {
-  features {}
-}
-
+variables.tf
+```hcl 
 variable "location" {
   description = "The Azure region where resources will be created"
   type        = string
   default     = "eastus"
 }
+```
 
+main.tf
+```hcl
 resource "azurerm_resource_group" "example_rg" {
   name     = "example-resource-group"
   location = var.location
@@ -319,12 +516,16 @@ In the above example, we parameterized the location by using variables.
 
 ### Outputs
 
-Outputs allow you to extract and display information from your Terraform configuration after it has been applied. This is useful for retrieving IP addresses, resource IDs, or any other relevant data. Outputs are most useful for chaining modules together. By using outputs from one module as inputs to another, you can create a modular and interconnected infrastructure configuration, enhancing reusability and maintainability.
+Outputs allow you to extract and display information from your Terraform configuration after it has been applied.
+This is useful for retrieving IP addresses, resource IDs, or any other relevant data.
+Outputs are most useful for chaining modules together.
+By using outputs from one module as inputs to another, you can create a modular infrastructure configuration, enhancing reusability and maintainability.
 
 #### Defining Outputs in `outputs.tf`
 
 You can define outputs in a separate `outputs.tf` file within your Terraform configuration directory. Below is an example of defining an output named `vm_ip` that captures the private IP address of a virtual machine:
 
+outputs.tf
 ```hcl
 output "vm_ip" {
   description = "The private IP address of the virtual machine"
@@ -350,13 +551,17 @@ vm_ip = "10.0.0.4"
 
 By utilizing outputs in your Terraform configurations, you can easily extract and display important information about your infrastructure.
 
+We will see in the Modules section how to chain modules togheter.
+
 ### Data Sources
 
-Data sources allow you to fetch information from external sources or existing infrastructure. This can be useful for retrieving information about existing resources to be used in your configurations.
+Data sources allow you to fetch information from external sources or existing infrastructure.
+This can be useful for retrieving information about existing resources to be used in your configurations.
 
 #### Using Data Sources to Retrieve Secrets from Azure Key Vault
 
-One common scenario for using data sources in Terraform is to retrieve secrets stored in an Azure Key Vault. Below is an example that demonstrates how to use the `azurerm_key_vault_secret` data source to fetch a secret from an Azure Key Vault and use it in your Terraform configuration:
+One common scenario for using data sources in Terraform is to retrieve secrets stored in an Azure Key Vault.
+Below is an example that demonstrates how to use the `azurerm_key_vault_secret` data source to fetch a secret from an Azure Key Vault and use it in your Terraform configuration:
 
 ```hcl
 data "azurerm_key_vault_secret" "example_secret" {
@@ -388,24 +593,32 @@ Local values allow you to define intermediate values that can be reused within y
 An example scenario for using local values in Terraform is to set the region code based on the full region name for use with `azurerm`. Below is an example that demonstrates how to use local values to map full region names to their corresponding region codes:
 
 ```hcl
+variable "location" {
+  description = "Azure Location to use"
+  type        = string
+  default     = "East US"
+}
+
 locals {
   region_mapping = {
-    "East US"      = "eastus"
-    "West US"      = "westus"
-    "Central US"   = "centralus"
-    "East Asia"    = "eastasia"
+    "East US"        = "eastus"
+    "West US"        = "westus"
+    "Central US"     = "centralus"
+    "East Asia"      = "eastasia"
     "Southeast Asia" = "southeastasia"
     # Add more region mappings as needed
   }
+
+  region_code = local.region_mapping[var.location]
 }
 
 resource "azurerm_virtual_machine" "example" {
   name                = "example-vm"
-  location            = local.region_mapping["East US"]
+  location            = local.region_code
   resource_group_name = "my-resource-group"
 
   admin_username      = "adminuser"
-  admin_password      = "AdminPassword123!"
+  admin_password      = "SuperSecurePassword;)"
 }
 ```
 
@@ -453,6 +666,8 @@ Terraform supports conditional expressions to handle conditional logic within yo
 
 ```hcl
 resource "libvirt_domain" "example" {
+  count = azurerm_vms(list)
+
   name   = "vm-${count.index}"
   memory = var.memory
   vcpu   = "1"
@@ -530,40 +745,6 @@ resource "libvirt_domain" "example" {
   }
 }
 ```
-
-### terraform.tfvars
-
-The `terraform.tfvars` file allows you to set values for your variables, making it easier to manage and share configuration settings. You can have multiple `tfvars` files to manage workspace-specific configurations. Below is an example demonstrating how to have multiple `tfvars` per workspace:
-
-Example of "dev.tfvars" file for development workspace.
-
-```hcl
-environment   = "dev"
-instance_type = "t2.micro"
-```
-
-Example of "prod.tfvars" file for production workspace.
-
-```hcl
-environment   = "prod"
-instance_type = "t2.large"
-```
-
-#### Using "terraform.tfvars" in workspace
-
-Load workspace-specific variables:
-
-*Note* Variable Loading
-
-It's important to note that when you initiate Terraform (terraform init), it does not load workspace-specific tfvars files automatically. You need to specify the variable file using the -var-file flag when running terraform plan, terraform apply, or terraform validate.
-
-To specify a workspace-specific tfvars file, you can use the -var-file flag as follows:
-
-```bash
-terraform plan -var-file=env/dev.tfvars
-```
-
-This will load the variables from env/dev.tfvars and use them in your Terraform operations.
 
 ### Modules
 
@@ -675,7 +856,7 @@ Run the following command to upgrade the providers and modules in your Terraform
 terraform init -upgrade
 ```
 
-### Workspaces
+### CLI Workspaces
 
 Workspaces allow you to manage multiple environments (e.g., development, staging, production) within a single Terraform configuration.
 
@@ -683,81 +864,6 @@ Workspaces allow you to manage multiple environments (e.g., development, staging
 terraform workspace new dev
 terraform workspace select dev
 ```
-
-### State Management Commands
-
-Terraform provides commands to manage the state file, which tracks the current state of your infrastructure managed by Terraform. You can use the following commands to interact with the state file:
-
-#### List Resources in State File
-
-The `terraform state list` command displays a list of all resources that are currently being managed by Terraform.
-
-```bash
-terraform state list
-```
-
-#### Show Resource Details
-
-The terraform state show command displays detailed information about a specific resource in the state file.
-
-```bash
-terraform state show aws_instance.example
-```
-
-#### Remove Resource from State File
-
-The terraform state rm command removes a resource from the state file. Use this command with caution, as it will not destroy the actual resource, but only remove it from the state file.
-
-```bash
-terraform state rm aws_instance.example
-```
-
-#### Pull Current State
-
-The terraform state pull command fetches the current state from the backend and writes it to a file.
-
-```bash
-terraform state pull > terraform.tfstate
-```
-
-#### Push Local State to Backend
-
-The terraform state push command uploads the local state file to the backend.
-
-```bash
-terraform state push
-```
-
-By utilizing these state management commands, you can inspect, modify, and sync the state file to manage your infrastructure.
-
-### Locking
-
-State file locking in Terraform prevents concurrent runs that can lead to conflicts and inconsistencies in the infrastructure. It ensures that only one Terraform operation can modify the state at a time, thereby maintaining consistency and integrity.
-
-```hcl
-terraform {
-  lock {
-    enabled = true
-  }
-}
-```
-
-#### Default Behavior
-
-The default behavior for state file locking in Terraform is to lock the state file automatically when performing operations like `terraform apply` or `terraform plan`.
-
-#### Behavior During Forceful Shutdown
-
-When a `terraform apply` or `terraform plan` operation is forcefully shut down (e.g., by using `Ctrl+C`), the state file remains locked for a certain period to prevent concurrent modifications. The duration of this lock can be configured using the `-lock-timeout` flag.
-
-#### Unlocking the State File
-
-If for some reason the state file remains locked and you need to unlock it manually, you can use the following command:
-
-```bash
-terraform force-unlock LOCK_ID
-```
-
 ### Sensitive Data
 
 You can mark sensitive variables to prevent them from being displayed in the console output or stored in the state file.
@@ -777,7 +883,8 @@ Terraform supports provisioning and managing resources across multiple cloud pro
 
 #### Using Multiple `azurerm` Providers with Resources
 
-You can specify multiple `azurerm` providers in your Terraform configuration to manage resources across different Azure subscriptions. Below is an example that demonstrates how to use two `azurerm` providers to create resources in two different Azure Resource Groups (RGs):
+You can specify multiple `azurerm` providers in your Terraform configuration to manage resources across different Azure subscriptions.
+Below is an example that demonstrates how to use two `azurerm` providers to create resources in two different Azure Resource Groups (RGs):
 
 ```hcl
 provider "azurerm" {
@@ -825,7 +932,27 @@ resource "aws_s3_bucket" "example" {
 }
 ```
 
-### need section on how to structure folders / project
+#### Specifying Providers in Resources
+
+When using multiple providers, you can specify which provider to use for each resource using the `provider` attribute.
+
+```hcl
+resource "azurerm_virtual_network" "vnet_westus" {
+  provider            = azurerm
+  name                = "vnet-westus"
+  resource_group_name = azurerm_resource_group.rg_westus.name
+  location            = azurerm_resource_group.rg_westus.location
+}
+
+resource "aws_vpc" "example" {
+  provider             = aws
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+}
+```
+
+### Organizing full project
 
 Organizing your Terraform code into a structured folder and project layout can help maintainability and readability. Here's a recommended folder structure:
 
@@ -840,18 +967,48 @@ terraform-project/
 │   │   ├── variables.tf
 │   │   └── outputs.tf
 │   └── ...
-├── environments/
-│   ├── prod/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   └── dev/
-│       ├── main.tf
-│       ├── variables.tf
-│       └── outputs.tf
+├── env/
+│   ├── dev.tfvars 
+│   └── prod.tfvars
 └── ...
 
 ```
+
+### terraform.tfvars
+
+The `terraform.tfvars` file allows you to set values for your variables, making it easier to manage and share configuration settings.
+You can have multiple `tfvars` files to manage workspace-specific configurations. Below is an example demonstrating how to have multiple `tfvars` per workspace:
+
+Example of "dev.tfvars" file for development workspace.
+
+```hcl
+environment   = "dev"
+instance_type = "t2.micro"
+```
+
+Example of "prod.tfvars" file for production workspace.
+
+```hcl
+environment   = "prod"
+instance_type = "t2.large"
+```
+
+#### Using "terraform.tfvars" in workspace
+
+Load workspace-specific variables:
+
+*Note* Variable Loading
+
+It's important to note that when you initiate Terraform (terraform init), it does not load workspace-specific tfvars files automatically. You need to specify the variable file using the -var-file flag when running terraform plan, terraform apply, or terraform validate.
+
+To specify a workspace-specific tfvars file, you can use the -var-file flag as follows:
+
+```bash
+terraform plan -var-file=env/dev.tfvars
+```
+
+This will load the variables from env/dev.tfvars and use them in your Terraform operations.
+
 
 ### Conditionals in Terraform
 
@@ -930,70 +1087,5 @@ resource "azurerm_linux_function_app" "example" {
   }
 }
 ```
-
-## Installation
-
-To install Terraform, download the appropriate package for your operating system from the [official Terraform website](https://www.terraform.io/downloads.html) and follow the installation instructions.
-
-### For Windows
-
-#### Windows AMD64 binary
-
-Link: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_windows_amd64.zip>
-
-#### Windows 386 binary
-
-Link: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_windows_386.zip>
-
-### For macOS
-
-#### Package manager
-
-```bash
- brew tap hashicorp/tap
- brew install hashicorp/tap/terraform
-```
-
-#### Binary AMD64
-
-LINK: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_amd64.zip>
-
-#### Binary ARM64
-
-LINK: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_arm64.zip>
-
-### For Ubuntu
-
-```bash
- wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
- echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
- sudo apt update && sudo apt install terraform
-```
-
-### For CentOS/RHEL
-
-```bash
- sudo yum install -y yum-utils
- sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
- sudo yum -y install terraform
-```
-
-### For Fedora
-
-```bash
- sudo dnf install -y dnf-plugins-core
- sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
- sudo dnf -y install terraform
-```
-
-### for Amazon Linux
-
-```bash
- sudo yum install -y yum-utils shadow-utils
- sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
- sudo yum -y install terraform
-```
-
----
 
 By adopting Terraform and Infrastructure as Code practices, organizations can achieve improved agility, scalability, and consistency in managing infrastructure.
