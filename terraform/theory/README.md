@@ -801,7 +801,7 @@ resource "libvirt_domain" "example" {
 
 Provisioners allow you to run scripts or commands on a resource after it has
 been created or destroyed. This can be useful for tasks such as installing
-software or configuring  services.
+software or configuring services.
 
 ```hcl
 resource "libvirt_domain" "example" {
@@ -945,7 +945,7 @@ terraform init
 
 To update to the latest versions of the providers and modules, you can use the
 terraform init -upgrade command. This command updates the provider and module
-dependencies to the latest  compatible versions.
+dependencies to the latest compatible versions.
 
 Run the following command to upgrade the providers and modules in your
 Terraform working directory:
