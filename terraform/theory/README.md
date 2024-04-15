@@ -283,25 +283,30 @@ configurations in a systematic manner.
 
 Before applying any Terraform configurations, it's essential to initialize the
 Terraform workspace.  This step downloads the required provider plugins and
-initializes the backend and installs any required modules.  It is also required
-to upgrade providers and modules.
+initializes the backend and installs any required modules.
+
+*Note*: It is also required to upgrade providers and modules.
 
 #### Validate Terraform code `terraform validate`
 
-*Note*: A good practice, before running plan is to run validate.  Validate does not
-query any remote services.  It enables you to catch quick easy bugs without the
-lengthy process of plan.
+*Note*: A good practice, before running plan is to run validate.
+
+- Validate does not query any remote services.
+- It enables you to catch quick easy bugs without the lengthy process of plan.
 
 #### Plan Infrastructure Changes `terraform plan`
 
 Planning will actually go and query the remote services and compare them with
-the current known state.  It is by far the most time consuming terraform
-operation(excluding the creation of whole infra from scratch).  It generates for
- us the changes required to move from the state to the desired state.It won't
- perform any infra changes.
+the current known state.  
 
-*Note*: The `-out` flag allows you to save the generated plan to a file named `plan`,
-which can be used later with `terraform apply`.
+- It is by far the most time consuming terraform operation(excluding the
+  creation of whole infra from scratch).  
+- It generates for us the changes required to move from the state to the desired
+  state.
+- It won't perform any infra changes.
+
+*Note*: The `-out` flag allows you to save the generated plan to a file named
+`plan`, which can be used later with `terraform apply`.
 
 #### Apply Infrastructure Changes with `terraform apply`
 
