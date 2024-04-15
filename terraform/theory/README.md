@@ -66,11 +66,11 @@ to challenges such as:
 - **Scalability issues**
 - **No automation**
 
-Terraform serves as a powerful example of IaC, automating infrastructure  
-provisioning and management by allowing you to define your infrastructure  
+Terraform serves as a powerful example of IaC, automating infrastructure
+provisioning and management by allowing you to define your infrastructure
 in configuration files.
 
-This approach addresses the pain points associated with manual infrastructure  
+This approach addresses the pain points associated with manual infrastructure
 management.
 
 ### Benefits of IAC
@@ -94,9 +94,9 @@ management.
 
 Before IaC, managing rollbacks was hard and error-prone.
 
-It was challenging to keep track of the tiny bits and pieces that were changed  
-manually, making it difficult to revert to a previous state reliably.With IaC,  
-you can leverage version control systems like Git to track changes to your  
+It was challenging to keep track of the tiny bits and pieces that were changed
+manually, making it difficult to revert to a previous state reliably.With IaC,
+you can leverage version control systems like Git to track changes to your
 infrastructure configurations over time.
 
 This enables you to:
@@ -107,7 +107,7 @@ purposes.
 
 #### Scaling
 
-- **Efficient Scaling**: Easier scaling of infrastructure resources to handle  
+- **Efficient Scaling**: Easier scaling of infrastructure resources to handle
   increased workload demands, improving customer satisfaction
 
 #### Collaboration and Knowledge Sharing
@@ -119,11 +119,11 @@ purposes.
 
 ### State Management
 
-Terraform maintains a consistent state of your infrastructure by tracking  
+Terraform maintains a consistent state of your infrastructure by tracking
 changes and dependencies between resources.
 
-The `tfstate` file stores the current state of your infrastructure,  
-allowing Terraform to understand which resources need to be created,  
+The `tfstate` file stores the current state of your infrastructure,
+allowing Terraform to understand which resources need to be created,
 updated, or destroyed.
 
 #### Best Practices for State Management
@@ -177,14 +177,14 @@ For more information on configuring AWS S3 as a Terraform backend, refer to the
 
 ### State Management Commands
 
-Terraform provides commands to manage the state file, which tracks the current  
+Terraform provides commands to manage the state file, which tracks the current
 state of your infrastructure managed by Terraform.
 
 *Note*: You can use the following commands to interact with the state file.
 
 #### List Resources in State File
 
-The `terraform state list` command displays a list of all resources that are  
+The `terraform state list` command displays a list of all resources that are
 currently being managed by Terraform.
 
 ```bash
@@ -193,7 +193,7 @@ terraform state list
 
 #### Show Resource Details
 
-The terraform state show command displays detailed information about a  
+The terraform state show command displays detailed information about a
 specific resource in the state file.
 
 ```bash
@@ -202,9 +202,9 @@ terraform state show aws_instance.example
 
 #### Remove Resource from State File
 
-The terraform state rm command removes a resource from the state file.  
+The terraform state rm command removes a resource from the state file.
 
-Use this command with caution, as it will not destroy the actual resource,  
+Use this command with caution, as it will not destroy the actual resource,
  but only remove it from the state file.
 
 ```bash
@@ -213,7 +213,7 @@ terraform state rm aws_instance.example
 
 #### Pull Current State
 
-The terraform state pull command fetches the current state from the backend and  
+The terraform state pull command fetches the current state from the backend and
 writes it to a file.
 
 ```bash
@@ -228,12 +228,12 @@ The terraform state push command uploads the local state file to the backend.
 terraform state push
 ```
 
-By utilizing these state management commands, you can inspect, modify, and sync  
+By utilizing these state management commands, you can inspect, modify, and sync
 the state file to manage your infrastructure.
 
 ### Locking
 
-State file locking in Terraform prevents concurrent runs that can lead to  
+State file locking in Terraform prevents concurrent runs that can lead to
 conflicts and inconsistencies in the infrastructure.  
 
 It ensures that only one Terraform client can modify the state at a time.
@@ -248,21 +248,21 @@ terraform {
 
 #### Default Behavior
 
-The default behavior for state file locking in Terraform is to lock the state  
-file automatically when performing operations like `terraform apply` or  
+The default behavior for state file locking in Terraform is to lock the state
+file automatically when performing operations like `terraform apply` or
 `terraform plan`.
 
 #### Behavior During Forceful Shutdown
 
-When a `terraform apply` or `terraform plan` operation is forcefully shut down  
-(e.g., by using `Ctrl+C`), the state file remains locked for a certain period  
+When a `terraform apply` or `terraform plan` operation is forcefully shut down
+(e.g., by using `Ctrl+C`), the state file remains locked for a certain period
 to prevent concurrent modifications.  
 
 The duration of this lock can be configured using the `-lock-timeout` flag.
 
 #### Unlocking the State File
 
-If for some reason the state file remains locked and you need to unlock it  
+If for some reason the state file remains locked and you need to unlock it
 manually, you can use the following command:
 
 ```bash
@@ -281,10 +281,10 @@ configurations in a systematic manner.
 
 #### Initialize Terraform Workspace `terraform init`
 
-Before applying any Terraform configurations, it's essential to initialize the  
+Before applying any Terraform configurations, it's essential to initialize the
 Terraform workspace.  
 
-This step downloads the required provider plugins and initializes the backend  
+This step downloads the required provider plugins and initializes the backend
 and installs any required modules.  
 
 It is also requiredto upgrade providers and modules.
@@ -298,39 +298,39 @@ It enables you to catch quick easy bugs without the lengthy process of plan
 
 #### Plan Infrastructure Changes `terraform plan`
 
-Planning will actually go and query the remote services and compare them with  
+Planning will actually go and query the remote services and compare them with
 the current known state.
 
-It is by far the most time consuming terraform operation(excluding the creation  
+It is by far the most time consuming terraform operation(excluding the creation
 of whole infra from scratch).
 
-It generates for us the changes required to move from the state to the desired  
+It generates for us the changes required to move from the state to the desired
 state.
 
 It won't perform any infra changes.
 
-The `-out` flag allows you to save the generated plan to a file named `plan`,  
+The `-out` flag allows you to save the generated plan to a file named `plan`,
 which can be used later with `terraform apply`.
 
 #### Apply Infrastructure Changes with `terraform apply`
 
-After reviewing the execution plan and ensuring everything looks correct, you  
+After reviewing the execution plan and ensuring everything looks correct, you
 can apply the changes to your infrastructure using the `terraform apply`
 command.  
 
-This command reads the saved plan from the `plan` file and applies the  
+This command reads the saved plan from the `plan` file and applies the
 changes to provision or update your infrastructure accordingly.
 
-By following this `plan` and `apply` workflow, you can preview and apply changes  
+By following this `plan` and `apply` workflow, you can preview and apply changes
 to your infrastructure.
 
 ### Terraform Context
 
-Which files does Terraform know to include? or discard when running the above  
+Which files does Terraform know to include? or discard when running the above
 commands?
 
 They made it simple for us.
-Everything ending in .tf in the current working directory is lumped togheter and  
+Everything ending in .tf in the current working directory is lumped togheter and
 interpreted at once.
 
 This makes it rather easy to organize tf code likewise:
@@ -346,7 +346,7 @@ output.tf    # return variables
 This is a generic example that is popular in the industry.
 There are multiple ways on how to organize code, no one size fits all.
 
-Key take away is terraform merges `./*.tf` files togheter and interprets them at  
+Key take away is terraform merges `./*.tf` files togheter and interprets them at
 once.
 
 ### Terraform Coding Guidelines
@@ -390,7 +390,7 @@ is the last one
 
 Resources are the building blocks of your infrastructure.
 
-They define the desired state of a particular object, such as a virtual machine,  
+They define the desired state of a particular object, such as a virtual machine,
 network, or DNS record.
 
 ```hcl
@@ -403,10 +403,10 @@ resource "libvirt_domain" "example" {
 
 ### Providers
 
-Providers are responsible for managing the lifecycle of a resource: create,  
+Providers are responsible for managing the lifecycle of a resource: create,
 read, update, delete.  
 
-They determine how to communicate with the respective APIs and perform CRUD  
+They determine how to communicate with the respective APIs and perform CRUD
 operations.
 
 ```hcl
@@ -419,7 +419,7 @@ provider "libvirt" {
 
 #### Defining Variables in `variables.tf`
 
-You can define variables in a separate `variables.tf` file within your Terraform  
+You can define variables in a separate `variables.tf` file within your Terraform
 configuration directory.
 
 Below is an example of defining a variable named `location`:
@@ -434,7 +434,7 @@ variable "location" {
 
 #### Defining Variables with Default Types
 
-You can constrain variables to default types in HCL (HashiCorp Configuration  
+You can constrain variables to default types in HCL (HashiCorp Configuration
 Language) such as `string`, `number`, `bool`, `list`, `map`, etc.
 
 #### Example of Location Variable
@@ -499,10 +499,10 @@ Object allows us to bind together different types in a logical component.
 
 #### Validating Variables
 
-Validating variables is crucial to ensure that the provided values meet certaina  
-criteria or constraints.  
+Validating variables is crucial to ensure that the provided values meet certaina
+criteria or constraints.
 
-*Note*: You can use the `validation` block to enforce validation rules on  
+*Note*: You can use the `validation` block to enforce validation rules on
 variables.
 
 Example: Validating VM Size
@@ -523,21 +523,21 @@ variable "vm_size" {
 
 - **Data Integrity**: Ensures that the data provided for variables is valid and
   consistent.
-- **Error Prevention**: Helps prevent misconfigurations and potential issues  
+- **Error Prevention**: Helps prevent misconfigurations and potential issues
   during resource provisioning.
-- **Improved Debugging**: Provides clear error messages when validation rules  
+- **Improved Debugging**: Provides clear error messages when validation rules
   are not met, aiding in troubleshooting.
 
-By leveraging Terraform's variable capabilities, including type constraints,  
-object construction, and validation, you can create more robust, flexible,  
+By leveraging Terraform's variable capabilities, including type constraints,
+object construction, and validation, you can create more robust, flexible,
 and maintainable infrastructure as code configurations.
 
 #### Using Variables in Resources
 
-Once a variable is defined, you can reference it within resources using the  
+Once a variable is defined, you can reference it within resources using the
 `${var.variable_name}` syntax.  
 
-Here's an example that demonstrates how to use the `location` variable in  
+Here's an example that demonstrates how to use the `location` variable in
 an `azurerm_resource_group` resource:
 
 ```hcl
@@ -559,22 +559,22 @@ In the above example, we parameterized the location by using variables.
 
 ### Outputs
 
-Outputs allow you to extract and display information from your Terraform  
+Outputs allow you to extract and display information from your Terraform
 configuration after it has been applied.
-This is useful for retrieving IP addresses, resource IDs, or any other relevant  
+This is useful for retrieving IP addresses, resource IDs, or any other relevant
 data.
 
 *Note*: Outputs are most useful for chaining modules together.
 
-By using outputs from one module as inputs to another, you can create a modular  
+By using outputs from one module as inputs to another, you can create a modular
 infrastructure configuration, enhancing reusability and maintainability.
 
 #### Defining Outputs in `outputs.tf`
 
-You can define outputs in a separate `outputs.tf` file within your Terraform  
+You can define outputs in a separate `outputs.tf` file within your Terraform
 configuration directory.  
 
-Below is an example of defining an output named `vm_ip` that captures the  
+Below is an example of defining an output named `vm_ip` that captures the
 private IP address of a virtual machine:
 
 ```hcl
@@ -584,47 +584,47 @@ output "vm_ip" {
 }
 ```
 
-In the example above, the `value` attribute of the `output` block references the  
-`private_ip_address` attribute of an `azurerm_virtual_machine` resource named  
+In the example above, the `value` attribute of the `output` block references the
+`private_ip_address` attribute of an `azurerm_virtual_machine` resource named
 `example`.
 
 #### Viewing Outputs with `terraform output`
 
-After applying your Terraform configuration, you can view the defined outputs  
-using the `terraform output` command. This will display the values of all  
-defined outputs, making it easy to retrieve important information about your  
+After applying your Terraform configuration, you can view the defined outputs
+using the `terraform output` command. This will display the values of all
+defined outputs, making it easy to retrieve important information about your
 infrastructure:
 
 ```bash
 terraform output
 ```
 
-The `terraform output` command will display the output in the terminal  
+The `terraform output` command will display the output in the terminal
 as follows:
 
 ```plaintext
 vm_ip = "10.0.0.4"
 ```
 
-By utilizing outputs in your Terraform configurations, you can easily extract  
+By utilizing outputs in your Terraform configurations, you can easily extract
 and display important information about your infrastructure.
 
 We will see in the Modules section how to chain modules togheter.
 
 ### Data Sources
 
-Data sources allow you to fetch information from external sources or existing  
+Data sources allow you to fetch information from external sources or existing
 infrastructure.
-This can be useful for retrieving information about existing resources to be  
+This can be useful for retrieving information about existing resources to be
 used in your configurations.
 
 #### Using Data Sources to Retrieve Secrets from Azure Key Vault
 
-One common scenario for using data sources in Terraform is to retrieve secrets  
+One common scenario for using data sources in Terraform is to retrieve secrets
 stored in an Azure Key Vault.
 
-Below is an example that demonstrates how to use the `azurerm_key_vault_secret`  
-data source to fetch a secret from an Azure Key Vault and use it in your  
+Below is an example that demonstrates how to use the `azurerm_key_vault_secret`
+data source to fetch a secret from an Azure Key Vault and use it in your
 Terraform configuration:
 
 ```hcl
@@ -654,16 +654,16 @@ In the example above:
 
 ### Local Values
 
-Local values allow you to define intermediate values that can be reused within  
-your Terraform configuration files. They are useful for avoiding repetition  
+Local values allow you to define intermediate values that can be reused within
+your Terraform configuration files. They are useful for avoiding repetition
 and improving readability.
 
 #### Using Local Values to Set Region Code Based on FullRegionName in `azurerm`
 
-An example scenario for using local values in Terraform is to set the region  
+An example scenario for using local values in Terraform is to set the region
 code based on the full region name for use with `azurerm`.
 
-Below is an example that demonstrates how to use local values to map full  
+Below is an example that demonstrates how to use local values to map full
 region names to their corresponding region codes:
 
 ```hcl
@@ -739,7 +739,7 @@ resource "libvirt_domain" "example" {
 
 ### Conditional Expressions
 
-Terraform supports conditional expressions to handle conditional logic within  
+Terraform supports conditional expressions to handle conditional logic within
 your configurations.
 
 ```hcl
@@ -809,8 +809,8 @@ resource "libvirt_domain" "example" {
 
 ### Provisioners
 
-Provisioners allow you to run scripts or commands on a resource after it has  
-been created or destroyed. This can be useful for tasks such as installing  
+Provisioners allow you to run scripts or commands on a resource after it has
+been created or destroyed. This can be useful for tasks such as installing
 software or configuring  services.
 
 ```hcl
@@ -830,14 +830,14 @@ resource "libvirt_domain" "example" {
 
 ### Modules
 
-Modules enable code reusability and allow you to organize your Terraform  
+Modules enable code reusability and allow you to organize your Terraform
 configurations into reusable components.  
 
 They can be used to encapsulate and abstract complex configurations.
 
 #### Associating Modules with Functions
 
-When thinking about Terraform modules, you can associate them with functions  
+When thinking about Terraform modules, you can associate them with functions
 in programming:
 
 - **Input** in functions corresponds to **variables** in Terraform modules.
@@ -845,7 +845,7 @@ in programming:
 
 #### Example Module: `instance`
 
-Here is an example of a Terraform module named `instance` that provisions a  
+Here is an example of a Terraform module named `instance` that provisions a
 virtual machine:
 
 ```hcl
@@ -871,7 +871,7 @@ resource "aws_instance" "example" {
 }
 ```
 
-You can use the instance module in your main Terraform configuration  
+You can use the instance module in your main Terraform configuration
 file as follows:
 
 ```hcl
@@ -891,27 +891,27 @@ module "prod_instance" {
 }
 ```
 
-Module names must be unique within your Terraform configurations to avoid  
+Module names must be unique within your Terraform configurations to avoid
 conflicts.  
 
-Ensure that each module has a distinct name when you include it multiple times  
+Ensure that each module has a distinct name when you include it multiple times
 in your configurations.
 
 ### Provider and Module Installation
 
-Before you can use a provider or module in your Terraform configuration, you  
+Before you can use a provider or module in your Terraform configuration, you
 need to install it.
 
-Terraform uses the `terraform init` command to initialize a working directory  
+Terraform uses the `terraform init` command to initialize a working directory
 containing Terraform configuration files.  
 
-*Note*: This command downloads the necessary providers and modules specified in  
+*Note*: This command downloads the necessary providers and modules specified in
  your configuration files.
 
 #### Installing Providers
 
-To install a specific provider, you can specify it in your Terraform  
-configuration file using the `required_providers` block or by directly  
+To install a specific provider, you can specify it in your Terraform
+configuration file using the `required_providers` block or by directly
 referencing it in your resources.
 
 Here is an example of specifying the `aws` provider in your configuration:
@@ -923,7 +923,7 @@ provider "aws" {
 }
 ```
 
-After adding the provider configuration, run the following command to initialize  
+After adding the provider configuration, run the following command to initialize
 your Terraform working directory:
 
 ```bash
@@ -932,7 +932,7 @@ terraform init
 
 #### Installing Modules
 
-To use a module in your Terraform configuration, you can specify its source in  
+To use a module in your Terraform configuration, you can specify its source in
 your configuration file using the module block.
 
 Here is an example of using a module named example-module:
@@ -944,7 +944,7 @@ module "example_module" {
 }
 ```
 
-After adding the module configuration, run the following command to initialize  
+After adding the module configuration, run the following command to initialize
 your Terraform working directory:
 
 ```bash
@@ -953,11 +953,11 @@ terraform init
 
 #### Updateing Providers and Modules
 
-To update to the latest versions of the providers and modules, you can use the  
-terraform init -upgrade command. This command updates the provider and module  
+To update to the latest versions of the providers and modules, you can use the
+terraform init -upgrade command. This command updates the provider and module
 dependencies to the latest  compatible versions.
 
-Run the following command to upgrade the providers and modules in your  
+Run the following command to upgrade the providers and modules in your
 Terraform working directory:
 
 ```bash
@@ -966,7 +966,7 @@ terraform init -upgrade
 
 ### CLI Workspaces
 
-Workspaces allow you to manage multiple environments (e.g., development,  
+Workspaces allow you to manage multiple environments (e.g., development,
 staging, production) within a single Terraform configuration.
 
 ```bash
@@ -976,7 +976,7 @@ terraform workspace select dev
 
 ### Sensitive Data
 
-You can mark sensitive variables to prevent them from being displayed in the  
+You can mark sensitive variables to prevent them from being displayed in the
 console output or stored in the state file.
 
 ```hcl
@@ -988,15 +988,15 @@ variable "password" {
 
 ### Multi-Cloud Support
 
-Terraform supports provisioning and managing resources across multiple cloud  
+Terraform supports provisioning and managing resources across multiple cloud
 providers and on-premises environments using a single tool.
 
 #### Using Multiple `azurerm` Providers with Resources
 
-You can specify multiple `azurerm` providers in your Terraform configuration  
+You can specify multiple `azurerm` providers in your Terraform configuration
 to manage resources across different Azure subscriptions.
 
-Below is an example that demonstrates how to use two `azurerm` providers to  
+Below is an example that demonstrates how to use two `azurerm` providers to
 create resources in two different Azure Resource Groups (RGs):
 
 ```hcl
@@ -1023,10 +1023,10 @@ resource "azurerm_resource_group" "example_subscription2" {
 
 #### Using `azurerm` and `aws` Providers with Resources
 
-You can also use both `azurerm` and `aws` providers in the same Terraform  
+You can also use both `azurerm` and `aws` providers in the same Terraform
 configuration.
 
-Below is an example that demonstrates how to use one `aws` provider and  
+Below is an example that demonstrates how to use one `aws` provider and
 two `azurerm` providers to manage resources across AWS and Azure:
 
 ```hcl
@@ -1051,7 +1051,7 @@ resource "aws_s3_bucket" "example" {
 
 #### Specifying Providers in Resources
 
-When using multiple providers, you can specify which provider to use for each  
+When using multiple providers, you can specify which provider to use for each
 resource using the `provider` attribute.
 
 ```hcl
@@ -1072,7 +1072,7 @@ resource "aws_vpc" "example" {
 
 ### Organizing Terraform Project
 
-Organizing your Terraform code into a structured folder and project layout can  
+Organizing your Terraform code into a structured folder and project layout can
 help maintainability and readability. Here's a recommended folder structure:
 
 ```css
@@ -1095,9 +1095,9 @@ terraform-project/
 
 ### terraform.tfvars File
 
-The `terraform.tfvars` file allows you to set values for your variables,  
-making it easier to manage and share configuration settings. You can have  
-multiple `tfvars` files to manage workspace-specific configurations.  
+The `terraform.tfvars` file allows you to set values for your variables,
+making it easier to manage and share configuration settings. You can have
+multiple `tfvars` files to manage workspace-specific configurations.
 
 Below is an example demonstrating how to have multiple `tfvars` per workspace:
 
@@ -1118,23 +1118,23 @@ instance_type = "t2.large"
 #### Using "terraform.tfvars" in workspace
 
 *Note*: It's important to note that when you initiate Terraform (terraform init),
-it does not load workspace-specific tfvars files automatically. You need to  
-specify the variable file using the -var-file flag when running terraform plan,  
-terraform apply, or terraform validate.  
+it does not load workspace-specific tfvars files automatically. You need to
+specify the variable file using the -var-file flag when running terraform plan,
+terraform apply, or terraform validate.
 
-To specify a workspace-specific tfvars file, you can use the -var-file flag  
+To specify a workspace-specific tfvars file, you can use the -var-file flag
 as follows:
 
 ```bash
 terraform plan -var-file=env/dev.tfvars
 ```
 
-This will load the variables from env/dev.tfvars and use them in your Terraform  
+This will load the variables from env/dev.tfvars and use them in your Terraform
 operations.
 
 ### Conditionals in Terraform
 
-You can use conditionals in Terraform to control resource creation based on  
+You can use conditionals in Terraform to control resource creation based on
 certain conditions.
 
 The syntax for conditionals is as follows:
@@ -1149,7 +1149,7 @@ resource "aws_instance" "example" {
 
 #### Using count with Lists
 
-You can use the count parameter to create multiple instances of a resource  
+You can use the count parameter to create multiple instances of a resource
 based on a list:
 
 ```hcl
@@ -1169,7 +1169,7 @@ resource "aws_instance" "example" {
 
 #### Using for_each with Maps
 
-You can use the for_each parameter to create multiple instances of a resource  
+You can use the for_each parameter to create multiple instances of a resource
 based on a map:
 
 ```hcl
@@ -1195,7 +1195,7 @@ resource "aws_instance" "example" {
 
 ### Dynamic Blocks in Terraform
 
-Dynamic blocks in Terraform allow you to include multiple configurations within  
+Dynamic blocks in Terraform allow you to include multiple configurations within
 a single resource block based on certain conditions or variables.
 
 ```hcl
@@ -1218,9 +1218,9 @@ resource "azurerm_linux_function_app" "example" {
 
 ### Terraform import
 
-The `terraform import` command is used in Terraform to import existing  
-resources into the Terraform state. This is particularly useful when you have  
-resources that were created outside of Terraform and you want to manage them  
+The `terraform import` command is used in Terraform to import existing
+resources into the Terraform state. This is particularly useful when you have
+resources that were created outside of Terraform and you want to manage them
 using Terraform going forward.
 
 Usage:
@@ -1229,21 +1229,21 @@ Usage:
 terraform import [options] ADDRESS ID  
 ```
 
-Import an AWS instance into the aws_instance resource  
+Import an AWS instance into the aws_instance resource
 named foo:
 
 ```hcl
 terraform import aws_instance.foo i-abcd1234  
 ```
 
-Import an AWS instance into the aws_instance resource named bar into a module  
+Import an AWS instance into the aws_instance resource named bar into a module
 named foo:
 
 ```hcl
 terraform import module.foo.aws_instance.bar i-abcd1234  
 ```
 
-Import an AWS instance into the first instance of the aws_instance resource  
+Import an AWS instance into the first instance of the aws_instance resource
 named baz configured with count:
 
 ```hcl
@@ -1290,7 +1290,7 @@ resource "aws_instance" "database_server" {
 
 ### Depends On
 
-The `depends_on` argument in Terraform allows you to define explicit  
+The `depends_on` argument in Terraform allows you to define explicit
 dependencies between resources. This ensures that Terraform will create or
 update resources in the correct order, respecting dependencies.
 
@@ -1334,19 +1334,19 @@ module "network_module" {
 }
 ```
 
-You can use the depends_on meta-argument in module blocks and in all resource  
+You can use the depends_on meta-argument in module blocks and in all resource
 blocks, regardless of resource type. It requires a list of references to other
 resources or child modules in the same calling module.
 
 ### Lifecycle
 
-Terraform provides various options to manage the lifecycle of resources,  
-including preventing certain changes, creating dependencies, and controlling  
+Terraform provides various options to manage the lifecycle of resources,
+including preventing certain changes, creating dependencies, and controlling
 the behavior during the apply and destroy phases.
 
 #### Lifecycle using `ignore_changes`
 
-You can use ignore_changes to prevent Terraform from updating specific  
+You can use ignore_changes to prevent Terraform from updating specific
 attributes of a resource during terraform apply, preserving the existing values.
 
 ```hcl
@@ -1364,7 +1364,7 @@ resource "aws_instance" "example" {
 
 #### Lifecycle using `prevent_destroy`
 
-The prevent_destroy option can be used to prevent a specific resource from  
+The prevent_destroy option can be used to prevent a specific resource from
 being destroyed by Terraform, which can be useful for critical resources.
 
 ```hcl
@@ -1379,7 +1379,7 @@ resource "aws_instance" "example" {
 
 #### Lifecycle using `create_before_destroy`
 
-You can use create_before_destroy to ensure that a new resource is created  
+You can use create_before_destroy to ensure that a new resource is created
 before the old one is destroyed during an update, minimizing downtime.
 
 ```hcl
