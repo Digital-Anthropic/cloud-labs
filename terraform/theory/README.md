@@ -282,44 +282,33 @@ configurations in a systematic manner.
 #### Initialize Terraform Workspace `terraform init`
 
 Before applying any Terraform configurations, it's essential to initialize the
-Terraform workspace.  
-
-This step downloads the required provider plugins and initializes the backend
-and installs any required modules.  
-
-It is also requiredto upgrade providers and modules.
+Terraform workspace.  This step downloads the required provider plugins and
+initializes the backend and installs any required modules.  It is also required
+to upgrade providers and modules.
 
 #### Validate Terraform code `terraform validate`
 
-A good practice, before running plan is to run validate.
-Validate does not query any remote services.
-It just ensures syntactic consistency of providers and modules.
-It enables you to catch quick easy bugs without the lengthy process of plan
+*Note*: A good practice, before running plan is to run validate.  Validate does not
+query any remote services.  It enables you to catch quick easy bugs without the
+lengthy process of plan.
 
 #### Plan Infrastructure Changes `terraform plan`
 
 Planning will actually go and query the remote services and compare them with
-the current known state.
+the current known state.  It is by far the most time consuming terraform
+operation(excluding the creation of whole infra from scratch).  It generates for
+ us the changes required to move from the state to the desired state.It won't
+ perform any infra changes.
 
-It is by far the most time consuming terraform operation(excluding the creation
-of whole infra from scratch).
-
-It generates for us the changes required to move from the state to the desired
-state.
-
-It won't perform any infra changes.
-
-The `-out` flag allows you to save the generated plan to a file named `plan`,
+*Note*: The `-out` flag allows you to save the generated plan to a file named `plan`,
 which can be used later with `terraform apply`.
 
 #### Apply Infrastructure Changes with `terraform apply`
 
 After reviewing the execution plan and ensuring everything looks correct, you
-can apply the changes to your infrastructure using the `terraform apply`
-command.  
-
-This command reads the saved plan from the `plan` file and applies the
-changes to provision or update your infrastructure accordingly.
+can apply the changes to your infrastructure using the `terraform apply`command.
+This command reads the saved plan from the `plan` file and applies the changes
+to provision or update your infrastructure accordingly.
 
 By following this `plan` and `apply` workflow, you can preview and apply changes
 to your infrastructure.
@@ -388,10 +377,8 @@ is the last one
 
 ### Resources
 
-Resources are the building blocks of your infrastructure.
-
-They define the desired state of a particular object, such as a virtual machine,
-network, or DNS record.
+Resources are the building blocks of your infrastructure.They define the desired
+state of a particular object, such as a virtual machine, network, or DNS record.
 
 ```hcl
 resource "libvirt_domain" "example" {
@@ -403,11 +390,9 @@ resource "libvirt_domain" "example" {
 
 ### Providers
 
-Providers are responsible for managing the lifecycle of a resource: create,
-read, update, delete.  
-
-They determine how to communicate with the respective APIs and perform CRUD
-operations.
+Providers are responsible for managing the lifecycle of a resource: create,read,
+update, delete. They determine how to communicate with the respective APIs and
+perform CRUD operations.
 
 ```hcl
 provider "libvirt" {
