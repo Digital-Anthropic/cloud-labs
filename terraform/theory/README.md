@@ -180,7 +180,7 @@ For more information on configuring AWS S3 as a Terraform backend, refer to the
 Terraform provides commands to manage the state file, which tracks the current
 state of your infrastructure managed by Terraform.
 
-You can use the following commands to interact with the state file:
+*Note*: You can use the following commands to interact with the state file.
 
 #### List Resources in State File
 
@@ -502,7 +502,8 @@ Object allows us to bind together different types in a logical component.
 Validating variables is crucial to ensure that the provided values meet certaina
 criteria or constraints.  
 
-You can use the `validation` block to enforce validation rules on variables.
+*Note*: You can use the `validation` block to enforce validation rules on  
+variables.
 
 Example: Validating VM Size
 
@@ -590,9 +591,9 @@ In the example above, the `value` attribute of the `output` block references the
 #### Viewing Outputs with `terraform output`
 
 After applying your Terraform configuration, you can view the defined outputs
-using the `terraform output` command.  
-This will display the values of all defined outputs, making it easy to  
-retrieve important information about your infrastructure:
+using the `terraform output` command. This will display the values of all  
+defined outputs, making it easy to retrieve important information about your  
+infrastructure:
 
 ```bash
 terraform output
@@ -1095,7 +1096,7 @@ terraform-project/
 ### terraform.tfvars File
 
 The `terraform.tfvars` file allows you to set values for your variables,
-making it easier to manage and share configuration settings.
+making it easier to manage and share configuration settings.  
 You can have multiple `tfvars` files to manage workspace-specific
 configurations.  
 
@@ -1124,7 +1125,7 @@ It's important to note that when you initiate Terraform (terraform init),
 it does not load workspace-specific tfvars files automatically.  
 
 You need to specify the variable file using the -var-file flag when running  
-terraform plan, terraform apply, or terraform validate.
+terraform plan, terraform apply, or terraform validate.  
 To specify a workspace-specific tfvars file, you can use the -var-file flag
 as follows:
 
@@ -1294,9 +1295,8 @@ resource "aws_instance" "database_server" {
 ### Depends On
 
 The `depends_on` argument in Terraform allows you to define explicit  
-dependencies between resources.  
-This ensures that Terraform will create or update resources in the correct  
-order, respecting dependencies.
+dependencies between resources. This ensures that Terraform will create or
+update resources in the correct order, respecting dependencies.
 
 Example using `depends_on` with resources:
 
@@ -1339,8 +1339,8 @@ module "network_module" {
 ```
 
 You can use the depends_on meta-argument in module blocks and in all resource  
-blocks, regardless of resource type. It requires a list of  
-references to other resources or child modules in the same calling module.
+blocks, regardless of resource type. It requires a list of references to other
+resources or child modules in the same calling module.
 
 ### Lifecycle
 
@@ -1400,8 +1400,8 @@ resource "aws_instance" "example" {
 #### Lifecycle using custom messages
 
 You can also use lifecycle to customize the messages displayed during the apply
-and destroy phases using `create_before_destroy_msg` and  
-`destroy_before_create_msg`.
+and destroy phases using `create_before_destroy_msg` and `destroy_before_create
+_msg`.
 
 ```hcl
 resource "aws_instance" "example" {
@@ -1415,7 +1415,3 @@ resource "aws_instance" "example" {
   }
 }
 ```
-
-By adopting Terraform and Infrastructure as Code practices, organizations can  
-achieve improved agility, scalability, and consistency in managing  
-infrastructure.
