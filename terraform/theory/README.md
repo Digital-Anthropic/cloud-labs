@@ -103,7 +103,7 @@ This enables you to:
 
 - Easily roll back to previous versions of your infrastructure configurations.
 - Reproduce specific infrastructure states for debugging, testing, or auditing
-purposes.
+  purposes.
 
 #### Scaling
 
@@ -129,12 +129,12 @@ updated, or destroyed.
 #### Best Practices for State Management
 
 - **Secure Storage**: Ensure the `tfstate` file is stored securely to protect
-sensitive information. Avoid storing it in public repositories.
+  sensitive information. Avoid storing it in public repositories.
 - **Collaboration**: For team-based projects, storing the state file in a
-shared location ensures that all team members are working with the
+  shared location ensures that all team members are working with the
 same infrastructure.
 - **Backup**: Regularly backup the state file to prevent data loss in case
-of accidental deletion or corruption.
+  of accidental deletion or corruption.
 
 #### Storing Terraform State in Azure Storage Account
 
