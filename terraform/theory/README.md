@@ -84,11 +84,11 @@ management.
 
 #### Consistency, Reproducibility and Rollbacks
 
-- **Consistent Deployments**: Ensure consistent and repeatable infrastructure
-- **Environment Parity**: Bring developers/qa closer to production environment
+- **Consistent Deployments**: Ensure consistent and repeatable infrastructure.
+- **Environment Parity**: Bring developers/qa closer to production environment.
 - **Reusable Components**: Create reusable infrastructure code modules and
-  templates that improve productivity and standardization
-- **Reproducibility**: Can do rollbacks
+  templates that improve productivity and standardization.
+- **Reproducibility**: Can do rollbacks.
 
 ##### Importance of Reproducibility and Rollbacks
 
@@ -108,12 +108,12 @@ This enables you to:
 #### Scaling
 
 - **Efficient Scaling**: Easier scaling of infrastructure resources to handle
-  increased workload demands, improving customer satisfaction
+  increased workload demands, improving customer satisfaction.
 
 #### Collaboration and Knowledge Sharing
 
 - **Shared Understanding**: Facilitate collaboration across ops teams.
-  No single point of failure(human)
+  No single point of failure(human).
 
 ## Terraform Overview
 
