@@ -1,37 +1,35 @@
-## Installation
+# Installation
 
 To install Terraform, download the appropriate package for your operating system from the [official Terraform website](https://www.terraform.io/downloads.html) and follow the installation instructions.
 
-# Stefan, 1.8 is out
+## For Windows
 
-### For Windows
+### Windows AMD64 binary
 
-#### Windows AMD64 binary
+Link: <https://releases.hashicorp.com/terraform/1.8.0/terraform_1.8.0_windows_amd64.zip>
 
-Link: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_windows_amd64.zip>
+### Windows 386 binary
 
-#### Windows 386 binary
+Link: <https://releases.hashicorp.com/terraform/1.8.0/terraform_1.8.0_windows_386.zip>
 
-Link: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_windows_386.zip>
+## For macOS
 
-### For macOS
-
-#### Package manager
+### Package manager
 
 ```bash
  brew tap hashicorp/tap
  brew install hashicorp/tap/terraform
 ```
 
-#### Binary AMD64
+### Binary AMD64
 
-LINK: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_amd64.zip>
+LINK: <https://releases.hashicorp.com/terraform/1.8.0/terraform_1.8.0_darwin_amd64.zip>
 
-#### Binary ARM64
+### Binary ARM64
 
-LINK: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_arm64.zip>
+LINK: <https://releases.hashicorp.com/terraform/1.8.0/terraform_1.8.0_darwin_arm64.zip>
 
-### For Ubuntu
+## For Ubuntu
 
 ```bash
  wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
@@ -39,7 +37,7 @@ LINK: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_arm
  sudo apt update && sudo apt install terraform
 ```
 
-### For CentOS/RHEL
+## For CentOS/RHEL
 
 ```bash
  sudo yum install -y yum-utils
@@ -47,7 +45,7 @@ LINK: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_arm
  sudo yum -y install terraform
 ```
 
-### For Fedora
+## For Fedora
 
 ```bash
  sudo dnf install -y dnf-plugins-core
@@ -55,7 +53,7 @@ LINK: <https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_arm
  sudo dnf -y install terraform
 ```
 
-### for Amazon Linux
+## for Amazon Linux
 
 ```bash
  sudo yum install -y yum-utils shadow-utils
