@@ -599,6 +599,9 @@ vm_ip = "10.0.0.4"
 By utilizing outputs in your Terraform configurations, you can easily extract
 and display important information about your infrastructure.
 
+*Note*: It's useful to use rendered content from tpl file in conjunction with
+other programs like Ansible for hosts or Helm for configuration values.
+
 We will see in the Modules section how to chain modules togheter.
 
 ### Data Sources
@@ -1399,5 +1402,75 @@ resource "aws_instance" "example" {
     destroy_before_create_msg = "Destroying old instance before creating 
     the new one..."
   }
+}
+```
+
+### Templating
+
+Terraform's templating uses tpl files or inline templatefile functions to
+dynamically generate configurations. Placeholders in tpl files or inline strings
+are replaced with provided variables.
+
+#### Usage
+
+Do you wonder how a `template.tpl` file will look like? Lets see an example
+using the template file to define Azure Resource Group and Storage Account
+configurations with placeholders for variables:
+
+```hcl
+resource "azurerm_resource_group" "example" {
+  name     = "{{ .resource_group_name }}"
+  location = "{{ .location }}"
+}
+
+resource "azurerm_storage_account" "example" {
+  name                     = "{{ .storage_account_name }}"
+  resource_group_name      = azurerm_resource_group.example.name
+  location                 = azurerm_resource_group.example.location
+  account_tier             = "{{ .account_tier }}"
+  account_replication_type = "{{ .account_replication_type }}"
+}
+```
+
+In your main.tf, you can use the template_file data source to render the
+template.tpl file with provided variables:
+
+```hcl
+data "template_file" "example" {
+  template = file("template.tpl")
+
+  vars = {
+    resource_group_name      = "example-rg"
+    location                 = "eastus"
+    storage_account_name     = "examplestorage"
+    account_tier             = "Standard"
+    account_replication_type = "LRS"
+  }
+}
+
+output "rendered_content" {
+  value = data.template_file.example.rendered
+}
+```
+
+*Note*: It's useful to use rendered content from tpl file in conjunction with
+other programs like Ansible for hosts or Helm for configuration values.
+
+After applying the Terraform configuration, the rendered_content output will
+contain the dynamically generated Azure Resource Group and Storage Account
+configurations based on the provided variables:
+
+```hcl
+resource "azurerm_resource_group" "example" {
+  name     = "example-rg"
+  location = "eastus"
+}
+
+resource "azurerm_storage_account" "example" {
+  name                     = "examplestorage"
+  resource_group_name      = azurerm_resource_group.example.name
+  location                 = azurerm_resource_group.example.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
 }
 ```
