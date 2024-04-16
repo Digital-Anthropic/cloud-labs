@@ -806,6 +806,68 @@ resource "libvirt_domain" "example" {
 
 ## Terraform Advanced
 
+### Best practices in terms of naming convention
+
+A good name for a resource helps you to quickly identify its type, its
+associated workload, its environment.
+
+#### Azure Naming Components
+
+For Azure, the primary rule for naming a resource is structured as follows:
+
+```hcl
+{Resource type}-{Business unit}-{Application or service name}
+-{Subscription purpose}-{Environment}-{Region}
+```
+
+Let's describe each term:
+
+- **Resource type**: A shorthand that denotes the category of Azure resource or
+  item. This often serves as either a prefix or a suffix in the naming.
+- **Business unit**: The highest division within your organization that manages
+  the subscription or the specific workload where the resource is used. In more
+  compact organizations, this could represent a primary organizational segment.
+- **Application or service name**: The specific label for the application,
+  workload, or service associated with the resource.
+- **Subscription purpose**: A brief overview of the subscription's goal or
+  purpose that encompasses the resource. It's usually segmented by environment
+  or specialized workloads.
+- **Environment**: The phase of the development cycle that the resource is
+  geared towards.
+- **Region**: The exact Azure location or region where the resource is set up.
+
+Example of naming a virtual machine resource in Azure:
+
+**The rule**: {Resource type}-{Business unit}-{Application or service name}
+-{Subscription purpose}-{Environment}-{Region}
+
+**The example**: vm-fin-navigator-prod-westus
+
+#### AWS Nameing Components
+
+For AWS the main rule for nameing a resource will be just like below:
+
+```hcl
+{group}-{env}-[{scope}]-{resource_name}
+```
+
+Let describe every term:
+
+- **group**: A group represents a unified context for our operations, like 'wsc'
+  or 'ec2'.
+- **env**: Denotes the specific setup of our infrastructure, with options
+  such as 'dev', 'staging', and 'prod'.
+- **scope**: It is a flexible field that aligns with the defined context, like
+  outlining the application's boundaries for a subnet.
+- **resource_name**: Obviously would be an the whole or an abbreviation of the
+  resource name, like 'alb' for 'application load balancer', etc.
+  
+Example of nameing a subnet resource with AWS:
+
+**The rule**: {group}-{env}-{availibility_zone}-{scope}-{public|private}
+
+**The example**: wsc-dev-eu-west-1b-myapp-public
+
 ### Advanced Expressions
 
 #### List Functions
@@ -869,7 +931,6 @@ default value if the key does not exist.
 ```hcl
 # variable.tf
 
-# Define a map with disk types and their corresponding sizes
 variable "disk_sizes" {
   description = "Map of disk sizes in GB"
   type        = map(number)
@@ -884,13 +945,10 @@ variable "disk_sizes" {
 ```hcl
 # main.tf
 
-# Retrieve disk sizes using the lookup function
-output "lookup_disk_sizes" {
-  value = {
-    small_size  = lookup(var.disk_sizes, "small", 0)
-    medium_size = lookup(var.disk_sizes, "medium", 0)
-    large_size  = lookup(var.disk_sizes, "large", 0)
-  }
+resource "aws_instance" "example" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+  disk_size     = lookup(var.disk_sizes, "medium", 0)
 }
 ```
 
@@ -1071,7 +1129,64 @@ terraform workspace new dev
 terraform workspace select dev
 ```
 
-Add section of the ${terraform.workspace} and how to use it. VS ${var.env}
+#### Using Workspaces
+
+Any Terraform configuration by default is associated with a backend that defines
+how Terraform executes operations and stores persistent data. This persistent
+data it belongs to a `Workspace`. If you haven't created already a new workspace
+for your configuration, you are using the `default` workspace which terraform
+creates from the start.
+
+*Note*: You cannot delete the default workspace.
+
+So with that been said, terraform allows to CRUD those workspaces and use them
+as you wish for your configurations, in the scope of separating them.
+
+*Note*: You will not be able to use a resource from one workspace to another,
+even if they exists physically. You can use a resource just in the context of
+the declared workspace.
+
+#### Workspace Interpolation
+
+We can use `${terraform.workspace}` interpolation sequence to reference the
+current workspace in a resource, this way a resource can have a different
+behaviour based on workspace.
+
+Example for sayn that we need less aws instances if we are on development
+workspace:
+
+```hcl
+# main.tf
+
+resource "aws_instance" "example" {
+  count = "${terraform.workspace == "dev" ? 2 : 1}"
+}
+```
+
+#### Using ${var.env}
+
+You can use ${var.env} to specify different configurations based on the
+environment (e.g., development, staging, production) without changing the
+workspace.
+
+```hcl
+#variables.tf
+
+variable "env" {
+  description = "Environment name"
+  type        = string
+  default     = "dev"
+}
+```
+
+```hcl
+#main.tf
+
+resource "aws_instance" "example" {
+  ami           = var.env == "dev" ? "ami-0c55b159cbfafe1f0" : "ami-0123456789a"
+  instance_type = var.env == "dev" ? "t2.micro" : "t2.large"  
+}
+```
 
 #### Specifying Providers in Resources
 
