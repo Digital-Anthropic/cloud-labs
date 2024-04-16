@@ -9,7 +9,7 @@ It allows you to define and provision infrastructure using a declarative
 configuration language.
 
 This documentation provides an overview of Terraform, its components,
-the benefits of adopting Infrastructure as Code practices and also some 
+the benefits of adopting Infrastructure as Code practices and also some
 terraform concepts that we consider valuable before starting writing tf files.
 
 In essence, Terraform acts as a reconciler between the current state of
@@ -778,23 +778,16 @@ variable "disk_sizes" {
   description = "List of disk sizes in GB"
   type        = list(number)
   default     = [128, 256, 512]
+
+    validation {
+    condition     = alltrue([for size in var.disk_sizes : size > 0])
+    error_message = "Each disk size must be a positive integer."
+  }
 }
 ```
 
-is this validated? does this work???
-count.index afaik is based on a count instance, which is missing in this
-scenario
-
-```hcl
-# main.tf
-
-resource "libvirt_domain" "example" {
-  name         = "vm-${count.index}"
-  memory       = var.memory
-  vcpu         = "1"
-  disk_size_gb = var.disk_sizes[count.index % length(var.disk_sizes)]
-}
-```
+*Node*: Using validation we can see that our list function used in `disk_sizes`
+variable is fully functional and we can iterate it.
 
 #### Map Functions
 
@@ -803,35 +796,56 @@ Map functions allow you to manipulate and iterate over maps.
 ```hcl
 # variables.tf
 
-variable "networks" {
-  description = "Map of network configurations"
+variable "users" {
+  description = "Map of user details"
   type        = map(object({
-    cidr_block = string
-    gateway    = string
+    name = string
+    age  = number
   }))
   default = {
-    internal = {
-      cidr_block = "10.0.1.0/24"
-      gateway    = "10.0.1.1"
+    alice = {
+      name = "Alice"
+      age  = 30
     },
-    external = {
-      cidr_block = "192.168.1.0/24"
-      gateway    = "192.168.1.1"
+    bob = {
+      name = "Bob"
+      age  = 25
     }
+  }
+
+  validation {
+    condition     = alltrue([for key, value in var.users : value.age > 0])
+    error_message = "Each age must be a positive integer."
   }
 }
 ```
 
-Bad example of map functions.....
+#### Lookup Function
+
+You can use the `lookup` function to retrieve a specific value from a map or a
+default value if the key does not exist.
 
 ```hcl
 # main.tf
 
-resource "libvirt_domain" "example" {
-  name   = "vm-${count.index}"
-  memory = var.memory
-  vcpu   = "1"
-  network_config = var.networks[count.index % length(var.networks)]
+# Define a map with disk types and their corresponding sizes
+variable "disk_sizes" {
+  description = "Map of disk sizes in GB"
+  type        = map(number)
+  default     = {
+    small  = 128
+    medium = 256
+    large  = 512
+  }
+}
+
+# Retrieve disk sizes using the lookup function
+output "lookup_disk_sizes" {
+  value = {
+    small_size  = lookup(var.disk_sizes, "small", 0)
+    medium_size = lookup(var.disk_sizes, "medium", 0)
+    large_size  = lookup(var.disk_sizes, "large", 0)
+  }
 }
 ```
 
@@ -844,6 +858,7 @@ services.
 
 ```hcl
 # main.tf 
+
 resource "libvirt_domain" "example" {
   name   = "terraform-vm"
   memory = "512"
@@ -1330,29 +1345,47 @@ put an actual example please
 
 ```hcl
 # main.tf
-
 resource "aws_instance" "web" {
-  # configuration for web instance
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "WebServer"
+  }
 }
 
 resource "aws_instance" "db" {
-  # configuration for db instance
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "DatabaseServer"
+  }
 }
 ```
 
 **After Refactoring**:
 
 ```hcl
+# Moved (Refactoring)
+moved "{from: aws_instance.web, to: aws_instance.web_server}"
+
+moved "{from: aws_instance.db, to: aws_instance.database_server}"
+
 resource "aws_instance" "web_server" {
-  # configuration for web instance
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "WebServer"
+  }
 }
 
 resource "aws_instance" "database_server" {
-  # configuration for db instance
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "DatabaseServer"
+  }
 }
 ```
-
-Where are the moved {from: to:}?
 
 ### Depends On
 
@@ -1365,14 +1398,30 @@ Example using `depends_on` with resources:
 
 ```hcl
 resource "aws_security_group" "example" {
-  # configuration for security group
+  name        = "example-security-group"
+  description = "Example security group"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "example-security-group"
+  }
 }
 
 resource "aws_instance" "example" {
-  # configuration for instance
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "example-instance"
+  }
 
   depends_on = [aws_security_group.example]
-}
 ```
 
 Example using `depends_on` with modules:
@@ -1422,8 +1471,9 @@ attributes of a resource during terraform apply, preserving the existing values.
 ```hcl
 # main.tf
 
-resource "aws_instance" "example" {
-  # configuration for instance
+resource "aws_instance" "example_ignore_changes" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
 
   lifecycle {
     ignore_changes = [
@@ -1442,8 +1492,9 @@ being destroyed by Terraform, which can be useful for critical resources.
 ```hcl
 # main.tf
 
-resource "aws_instance" "example" {
-  # configuration for instance
+resource "aws_instance" "example_prevent_destroy" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
 
   lifecycle {
     prevent_destroy = true  # prevent this instance from being destroyed
@@ -1457,12 +1508,15 @@ You can use create_before_destroy to ensure that a new resource is created
 before the old one is destroyed during an update, minimizing downtime.
 
 ```hcl
-resource "aws_instance" "example" {
-  # configuration for instance
+# main.tf
+
+resource "aws_instance" "example_create_before_destroy" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
 
   lifecycle {
-    create_before_destroy = true  # create a new instance before destroying 
-                                  # the old one
+    create_before_destroy = true  # create a new instance before destroying the 
+                                  # old one
   }
 }
 ```
@@ -1474,14 +1528,17 @@ and destroy phases using `create_before_destroy_msg` and `destroy_before_create
 _msg`.
 
 ```hcl
-resource "aws_instance" "example" {
-  # configuration for instance
+# main.tf
+
+resource "aws_instance" "example_custom_messages" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
 
   lifecycle {
-    create_before_destroy_msg = "Creating new instance before destroying 
-    the old one..."
-    destroy_before_create_msg = "Destroying old instance before creating 
-    the new one..."
+    create_before_destroy_msg = "Creating new instance before destroying the 
+    old one..."
+    destroy_before_create_msg = "Destroying old instance before creating the new
+    one..."
   }
 }
 ```
@@ -1530,11 +1587,11 @@ data "template_file" "example" {
 }
 
 output "rendered_content" {
-  value = data.template_file.example.rendered
+  value = data.template_file.example.rendered#
 }
 ```
 
-*Note*: It's useful to use rendered content from tpl file in conjunction with
+*Note*: It's useful to use rendered content from tpl file in conjunction with#
 other programs like Ansible for hosts or Helm for configuration values.
 
 After applying the Terraform configuration, the rendered_content output will
