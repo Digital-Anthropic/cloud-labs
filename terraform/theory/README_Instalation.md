@@ -1,6 +1,9 @@
+
 # Installation
 
-To install Terraform, download the appropriate package for your operating system from the [official Terraform website](https://www.terraform.io/downloads.html) and follow the installation instructions.
+To install Terraform, download the appropriate package for your operating system
+from the [official Terraform website](https://www.terraform.io/downloads.html)
+and follow the installation instructions.
 
 ## For Windows
 

@@ -1,9 +1,10 @@
+
 # Terraform and Infrastructure as Code (IAC) Documentation
 
 ## Introduction
 
-Terraform is an open-source Infrastructure as Code (IAC) tool created by
-HashiCorp.
+Terraform is an open-source Infrastructure as Code (IAC) tool created by  
+HashiCorp.  
 
 It allows you to define and provision infrastructure using a declarative
 configuration language.
