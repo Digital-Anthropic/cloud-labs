@@ -142,6 +142,8 @@ To store the Terraform state file in an Azure Storage Account,
 you can use the following backend configuration:
 
 ```hcl
+# backend.tf
+
 terraform {
   backend "azurerm" {
     resource_group_name  = "myResourceGroup"
@@ -161,6 +163,8 @@ To store the Terraform state file in an AWS S3 Bucket, you can use the
 following backend configuration:
 
 ```hcl
+# backend.tf
+
 terraform {
   backend "s3" {
     bucket         = "my-terraform-state-bucket"
@@ -242,6 +246,8 @@ conflicts and inconsistencies in the infrastructure.
 It ensures that only one Terraform client can modify the state at a time.
 
 ```hcl
+# versions.tf
+
 terraform {
   lock {
     enabled = true
@@ -336,6 +342,8 @@ This makes it rather easy to organize tf code likewise:
 
 ```plaintext
 main.tf      # bulk of the resources
+backend.tf   # where to store state
+versions.tf  # terraform config and providers config 
 variables.tf # think of these as function inputs for your tf code
 locals.tf    # these would be variables declared in the function context
 data.tf      # when we want to query remote services
@@ -355,6 +363,8 @@ Tabs as 2 spaces.
 Example module instantiation:
 
 ```hcl
+# main.tf
+
 module "network" {
   source = "path/to/source" # the source definition always sits at the very top 
   so we know what we run
@@ -392,6 +402,8 @@ They define the desired state of a particular object, such as a virtual
 machine, network, or DNS record.
 
 ```hcl
+# main.tf
+
 resource "libvirt_domain" "example" {
   name   = "terraform-vm"
   memory = "512"
@@ -407,6 +419,8 @@ They determine how to communicate with the respective APIs and perform CRUD
 operations.
 
 ```hcl
+# versions.tf
+
 provider "libvirt" {
   uri = "qemu:///system"
 }
@@ -422,6 +436,8 @@ configuration directory.
 Below is an example of defining a variable named `location`:
 
 ```hcl
+# variables.tf
+
 variable "location" {
   description = "The Azure region where resources will be created"
   type        = string
@@ -437,6 +453,8 @@ Language) such as `string`, `number`, `bool`, `list`, `map`, etc.
 #### Example of Location Variable
 
 ```hcl
+# variables.tf
+
 variable "location" {
   description = "The Azure region where resources will be created"
   type        = string
@@ -447,6 +465,8 @@ variable "location" {
 #### Example of Virtual Machine Configuration Object
 
 ```hcl
+# variables.tf
+
 variable "vm_config" {
   description = "Virtual machine configuration"
   type        = object({
@@ -489,6 +509,8 @@ variables.
 Example: Validating VM Size
 
 ```hcl
+# variables.tf
+
 variable "vm_size" {
   description = "Virtual machine size"
   type        = string
@@ -522,6 +544,7 @@ an `azurerm_resource_group` resource:
 
 ```hcl
 #variables.tf
+
 variable "location" {
   description = "The Azure region where resources will be created"
   type        = string
@@ -530,7 +553,8 @@ variable "location" {
 ```
 
 ```hcl
-main.tf
+# main.tf
+
 resource "azurerm_resource_group" "example_rg" {
   name     = "example-resource-group"
   location = var.location
@@ -560,6 +584,8 @@ Below is an example of defining an output named `vm_ip` that captures the
 private IP address of a virtual machine:
 
 ```hcl
+# outputs.tf
+
 output "vm_ip" {
   description = "The private IP address of the virtual machine"
   value       = azurerm_virtual_machine.example.private_ip_address
@@ -627,10 +653,16 @@ data source to fetch a secret from an Azure Key Vault and use it in your
 Terraform configuration:
 
 ```hcl
+# data.tf
+
 data "azurerm_key_vault_secret" "admin_password" {
   name         = "admin-password-secret"
   key_vault_id = "/subscriptions/subscription_id/resourceGroups/my-resource-group/providers/Microsoft.KeyVault/vaults/my-key-vault"
 }
+```
+
+```hcl
+# main.tf
 
 resource "azurerm_virtual_machine" "example" {
   name                = "example-vm"
@@ -666,7 +698,8 @@ Below is an example that demonstrates how to use local values to map full
 region names to their corresponding region codes:
 
 ```hcl
-#variables.tf
+# variables.tf
+
 variable "location" {
   description = "Azure Location to use"
   type        = string
@@ -675,7 +708,8 @@ variable "location" {
 ```
 
 ```hcl
-#locals.tf
+# locals.tf
+
 locals {
   region_mapping = {
     "East US"        = "eastus"
@@ -691,7 +725,8 @@ locals {
 ```
 
 ```hcl
-#main.tf
+# main.tf
+
 resource "azurerm_virtual_machine" "example" {
   name                = "example-vm"
   location            = local.region_code
@@ -717,8 +752,9 @@ In the example above:
 You can perform basic arithmetic operations in Terraform using expressions.
 
 ```hcl
-variable "memory" {
 # variables.tf
+
+variable "memory" {
   description = "The memory size for the VM in MB"
   type        = number
   default     = 1024
@@ -726,7 +762,8 @@ variable "memory" {
 ```
 
 ```hcl
-main.tf
+# main.tf
+
 resource "libvirt_domain" "example" {
   name   = "vm-${count.index}"
   memory = var.memory * 2  # Doubles the memory size
@@ -739,11 +776,13 @@ resource "libvirt_domain" "example" {
 String manipulation functions allow you to modify and concatenate strings.
 
 ```hcl
+# main.tf
+
 resource "libvirt_domain" "example" {
-  name   = "vm-${count.index}"
-  memory = var.memory
-  vcpu   = "1"
-  hostname = "vm-${count.index}.example.com"  # Concatenates strings
+  name     = "vm-${count.index}"
+  memory   = var.memory
+  vcpu     = "1"
+  hostname = "vm-${count.index}.example.com" # Concatenates strings
 }
 ```
 
@@ -753,13 +792,15 @@ Terraform supports conditional expressions to handle conditional logic within
 your configurations.
 
 ```hcl
+# main.tf
+
 resource "libvirt_domain" "example" {
   count = azurerm_vms(list)
 
   name    = "vm-${count.index}"
   memory  = var.memory
   vcpu    = "1"
-  enabled = count.index % 2 == 0  # Enables every other VM
+  enabled = count.index % 2 == 0 # Enables every other VM
 }
 ```
 
@@ -779,7 +820,7 @@ variable "disk_sizes" {
   type        = list(number)
   default     = [128, 256, 512]
 
-    validation {
+  validation {
     condition     = alltrue([for size in var.disk_sizes : size > 0])
     error_message = "Each disk size must be a positive integer."
   }
@@ -826,7 +867,7 @@ You can use the `lookup` function to retrieve a specific value from a map or a
 default value if the key does not exist.
 
 ```hcl
-# main.tf
+# variable.tf
 
 # Define a map with disk types and their corresponding sizes
 variable "disk_sizes" {
@@ -838,6 +879,10 @@ variable "disk_sizes" {
     large  = 512
   }
 }
+```
+
+```hcl
+# main.tf
 
 # Retrieve disk sizes using the lookup function
 output "lookup_disk_sizes" {
@@ -966,6 +1011,7 @@ Here is an example of specifying the `aws` provider in your configuration:
 
 ```hcl
 # versions.tf
+
 provider "aws" {
   region = "us-west-1"
 }
@@ -1025,12 +1071,16 @@ terraform workspace new dev
 terraform workspace select dev
 ```
 
+Add section of the ${terraform.workspace} and how to use it. VS ${var.env}
+
 #### Specifying Providers in Resources
 
 When using multiple providers, you can specify which provider to use for each
 resource using the `provider` attribute.
 
 ```hcl
+# main.tf
+
 resource "azurerm_virtual_network" "vnet_westus" {
   provider            = azurerm
 
@@ -1179,6 +1229,7 @@ You need to specify the variable file using the `-var-file` flag when running
 For `terraform init` or `terraform validate` these are not needed.
 
 ```bash
+terraform workspace select dev # you usually use tfvars with workspaces
 terraform plan -var-file=env/dev.tfvars
 ```
 
@@ -1340,11 +1391,9 @@ Example:
 
 **Before Refactoring**:
 
-What is this Stefan??
-put an actual example please
-
 ```hcl
 # main.tf
+
 resource "aws_instance" "web" {
   ami           = "ami-0c55b159cbfafe1f0"
   instance_type = "t2.micro"
@@ -1365,10 +1414,18 @@ resource "aws_instance" "db" {
 **After Refactoring**:
 
 ```hcl
+# main.tf
 # Moved (Refactoring)
-moved "{from: aws_instance.web, to: aws_instance.web_server}"
 
-moved "{from: aws_instance.db, to: aws_instance.database_server}"
+moved {
+  from = aws_instance.web
+  to   = aws_instance.web_server
+}
+
+moved {
+  from = aws_instance.db
+  to   = aws_instance.database_server
+}
 
 resource "aws_instance" "web_server" {
   ami           = "ami-0c55b159cbfafe1f0"
@@ -1397,6 +1454,8 @@ order, respecting dependencies that are not built into the providers.
 Example using `depends_on` with resources:
 
 ```hcl
+# main.tf
+
 resource "aws_security_group" "example" {
   name        = "example-security-group"
   description = "Example security group"
@@ -1574,6 +1633,8 @@ In your main.tf, you can use the template_file data source to render the
 template.tpl file with provided variables:
 
 ```hcl
+# data.tf
+
 data "template_file" "example" {
   template = file("template.tpl")
 
@@ -1585,6 +1646,10 @@ data "template_file" "example" {
     account_replication_type = "LRS"
   }
 }
+```
+
+```hcl
+# outputs.tf
 
 output "rendered_content" {
   value = data.template_file.example.rendered#
@@ -1592,7 +1657,7 @@ output "rendered_content" {
 ```
 
 *Note*: It's useful to use rendered content from tpl file in conjunction with#
-other programs like Ansible for hosts or Helm for configuration values.
+other programs like Ansible for hosts or Helm for values file.
 
 After applying the Terraform configuration, the rendered_content output will
 contain the dynamically generated Azure Resource Group and Storage Account
