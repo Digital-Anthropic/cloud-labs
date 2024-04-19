@@ -53,6 +53,8 @@ a bit like trying to juggle multiple balls in the air without dropping any. It
 was a manual and error-prone process that often led to inconsistencies and
 headaches.
 
+![canvas](https://github.com/Digital-Anthropic/cloud-labs/assets/97911661/9c7faf19-041e-4d90-900c-7d3840c4473e)
+
 Managing cloud infrastructure without Infrastructure as Code (IaC) leads
 to challenges such as:
 
