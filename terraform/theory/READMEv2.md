@@ -63,15 +63,14 @@ to challenges such as:
 - **Scalability issues**
 - **No automation**
 
-So, what exactly is Infrastructure as Code (IAC)? Imagine treating
+ So, what exactly is Infrastructure as Code (IAC)? Imagine treating
 infrastructure like software, where you can write code to define, version, and
 maintain your infrastructure configurations. With IAC, you can automate the
 deployment, scaling, and management of infrastructure resources, making your
 life a whole lot easier and reducing the chances of manual errors. It's like
 having a blueprint or a recipe for your infrastructure that you can share,
 collaborate on, and improve over time.
-
-But, like any new concept, IAC comes with its own set of questions. How do you
+ But, like any new concept, IAC comes with its own set of questions. How do you
 get started with IAC? What tools and languages should you learn? How do you
 ensure that everyone on your team understands and follows best practices? And
 let's not forget, while IAC is great for managing and provisioning
@@ -79,8 +78,7 @@ infrastructure, it's not a one-size-fits-all solution. You still need to think
 about application deployment, real-time monitoring, alerting, complex workflows,
 orchestration, and CI/CD pipelines. But we will get on those mentioned at the
 right moment.
-
-As you dive deeper into the world of Infrastructure as Code, you'll come across
+ As you dive deeper into the world of Infrastructure as Code, you'll come across
 a powerful tool called Terraform. Terraform has gained popularity for its
 ability to manage and provision infrastructure resources across multiple cloud
 providers and environments using a declarative configuration language. It's like
