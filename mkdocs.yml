@@ -31,9 +31,9 @@ nav:
   - Home: README.md
   - Terraform:
     - Terraform Intro: terraform/theory/README_Terraform_Intro.md
-    - Terraform Lab: terraform/theory/README.md
-    - Terraform Installation: terraform/theory/README_Instalation.md
-    - Terraform Demo: terraform/demos/README.md
+    - Terraform Lab: terraform/theory/README_Terraform_Lab.md
+    - Terraform Installation: terraform/theory/README_Terraform_Instalation.md
+    - Terraform Demo: terraform/demos/README_Terraform_Demo.md
 
 plugins:
   - social
