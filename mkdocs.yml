@@ -30,10 +30,10 @@ theme:
 nav:
   - Home: README.md
   - Terraform:
-    - Terraform Intro: terraform/theory/README_Terraform_Intro.md
-    - Terraform Lab: terraform/theory/README_Terraform_Lab.md
-    - Terraform Installation: terraform/theory/README_Terraform_Instalation.md
-    - Terraform Demo: terraform/demos/README_Terraform_Demo.md
+    - Terraform Intro: ./terraform/theory/Intro/README.md
+    - Terraform Lab: ./terraform/theory/Lab/README.md
+    - Terraform Installation: ./terraform/theory/Installation/README.md
+    - Terraform Demo: ./terraform/demos/Demo-readme/README.md
 
 plugins:
   - social
