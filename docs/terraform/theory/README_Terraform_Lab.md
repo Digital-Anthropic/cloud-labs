@@ -1,5 +1,5 @@
 
-# Terraform and Infrastructure as Code (IAC) Documentation
+# Terraform and Infrastructure as Code (IAC) Lab
 
 ## Introduction
 
