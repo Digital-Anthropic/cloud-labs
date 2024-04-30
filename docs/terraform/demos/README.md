@@ -48,25 +48,25 @@ on Ubuntu 22.04:
 
 1. **Update Package List**
 
-    ```bash
+    ```
     sudo apt update
     ```
 
 2. **Install KVM and Related Packages**
 
-    ```bash
+    ```
     sudo apt install -y qemu qemu-kvm libvirt-daemon libvirt-clients bridge-utils
     ```
 
 3. **Enable and Start libvirtd Service**
 
-    ```bash
+    ```
     sudo systemctl enable --now libvirtd
     ```
 
 4. **Check if KVM Kernel Modules are Loaded**
 
-    ```bash
+    ```
     lsmod | grep kvm
     ```
 
@@ -77,7 +77,7 @@ the 'security_driver = "none"' (also uncomment the line if is commented).
 After security driver is set to none you can restart the libvirt service for
 changes to take effect, you can use below command to achieve this:
 
-```bash
+```
  sudo systemctl restart libvirtd
 ```
 
@@ -96,14 +96,14 @@ I will leave a link below from where you can find some Ubuntu images:
 (<https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img>).
 You can run the command below to get it:
 
-```bash
+```
 wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img
 ```
 
 After you have the .img file in your local machine, we will need to simply
 extend that image with at least 10GB using QEMU. Use the command below for that.
 
-```bash
+```
 qemu-img resize path/to/jammy-server-cloudimg-amd64-disk-kvm.img +10G
 ```
 
@@ -114,20 +114,20 @@ the demo. Follow the steps below to execute the demonstration:
 
 1. **Create Directory and Navigate to the Directory**
 
-    ```bash
+    ```
     mkdir terraform-demo
     cd terraform-demo
     ```
 
 2. **Clone GitHub Repository**
 
-    ```bash
+    ```
     git clone https://github.com/Digital-Anthropic/cloud-labs
     ```
 
 3. **Navigate to the demo directory**
 
-    ```bash
+    ```
     cd cloud-labs/terraform/demos
     ```
 
@@ -136,19 +136,19 @@ the demo. Follow the steps below to execute the demonstration:
 
 4. **Initialize Terraform**
 
-    ```bash
+    ```
     terraform init
     ```
 
 5. **Preview the plan that Terraform created**
 
-    ```bash
+    ```
     terraform plan
     ```
 
 6. **Apply the plan**
 
-    ```bash
+    ```
     terraform apply
     ```
 
