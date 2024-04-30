@@ -28,7 +28,6 @@ module "vms_module" {
 
   source = "./vms-module"
 
-  depends_on = [module.network_module]
   vm_vms_configs = {
     "${each.key}" = {
       count   = each.value.count
