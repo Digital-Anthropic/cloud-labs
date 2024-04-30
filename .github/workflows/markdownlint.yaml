@@ -24,7 +24,7 @@ jobs:
 
     - name: Lint Markdown files
       run: |
-        markdownlint '**/*.md' --ignore MD040 || exit 1
+        markdownlint '**/*.md' --config .markdownlint.json || exit 1
 
     - name: Upload artifact if linting fails
       if: failure()
