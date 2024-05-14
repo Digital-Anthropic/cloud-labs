@@ -510,3 +510,278 @@ data "tfe_github_app_installation" "this" {
   installation_id = var.github_app_installation_id
 }
 ```
+
+Now we need to change the workspace module from `main.tf` file to have a
+"vcs_repo" attribute. It will look like below:
+
+```hcl
+module "workspace" {
+  for_each = local.workspace
+
+  source = "ALT-F4-LLC/workspace/tfe"
+  version = "0.8.0"
+
+  description = each.value.description
+  name = each.key
+  execution_mode = each.value.execution_mode
+  organization_name = var.organization_name
+  project_id = each.value.project_id
+  
+  vcs_repo = {
+    github_app_installation_id = data.tfe_github_app_installation.this.id
+    identifier                 = each.value.vcs_repo_identifier
+    }
+}
+```
+
+You can notice that now we have a "vcs_repo_identifier" in module workspace ->
+vcs repo attribute, which has its value from locals interation, so we will need
+to add this also into `locals.tf` file.
+
+```hcl
+locals {
+  project = {
+    "mkdocs-project" = {
+      description = "Example description of project"
+    }
+  }
+}
+  workspace = {
+    "mkdocs-tfe" = {
+      description    = "Example description of project"
+      execution_mode = "remote"
+      project_id     = module.project["mkdocs-project"].id
+      vcs_repo_identifier ="${var.github_organization_name}/repository-name"
+    }
+  }
+```
+
+The value of the vcs_repo_identifier will be your normally github username which
+we already defined in "github_organization_name" variable (so we can use it),
+followed by a slash `/` and the Github repository name.
+
+*Note*: WE WILL ALSO CHANGE THE EXECUTION MODE FROM LOCAL TO REMOTE.
+
+Now is the moment when you can do a terraform plan (using your terraform
+credentials), and if you go to the Terraform Cloud Workspaces Overview you will
+see a plan being executed on the cloud.
+
+*Note*: WE need to let it finish and DO NOT APPLY, because it will just revert
+the changes we've done,so after it's done discard it, why? Because we did not
+push our changes to github(our ONLY source of truth).
+
+But before we commit our changes to github we need to add into Terraform Cloud
+some variables.
+
+Go to Terraform cloud --> Settings --> Variable Sets.
+
+Click on "Create Variable Set", give it a name , select apply to specific
+projects and workspaces, go to apply to workspaces dropdown menu and select your
+workspace.
+
+Now we need to add the actual variable so go down and you will find
+"add variable", select the variable category "environment variable". the key of
+the variable will be "TFE_TOKEN" and the value will be the one used to do
+terraform plan for example.
+
+Now we can commit and push our changes into github and after it you can see that
+a plan will be triggered in Terraform Cloud that will hopelly succeed.
+
+## Github Automation
+
+This chapter is basically using terraform and github to automate the creation of
+of our github repositories.
+
+For that we will need to create another repository `:))`. So go to your github
+account and create another repository, you can follow the same steps we did
+before but change the name as you wish(better something related to github).
+
+Now that we have the a new repository go to the `local.tf` file we created on
+the previous repository we created and add a new workspace for the newly created
+repository.
+
+```hcl
+locals {
+  project = {
+    "mkdocs-project" = {
+      description = "Example description of project"
+    }
+  }
+}
+
+  workspace = {
+    "mkdocs-tfe" = {
+      description    = "Example description of project"
+      execution_mode = "remote"
+      project_id     = module.project["mkdocs-project"].id
+      vcs_repo_identifier ="${var.github_organization_name}/repository-name"
+    }
+  }
+
+    "new-workspace-for-new-github-repo" = {
+      description    = "Example description of workspace"
+      execution_mode = "local"
+      project_id     = module.project["mkdocs-project"].id
+      vcs_repo_identifier = "${var.github_organization_name}/new-github-repo"
+    }
+```
+
+*Note*: We are setting the execution mode to "local" because we don't actually
+have a state for that workspace. So we set it like that first.
+
+Now we just need to add the changes, commit and push to github and our workspace
+will be created. Wait until plan is triggerd after push and apply the changes.
+
+Next think we need to do is to clone the repository we create for github
+automation into our machine. So go on and do that.
+
+Inside the repo we will create a `locals.tf` file, a `main.tf` and
+`variables.tf` file. Let's start with `main.tf` file.
+
+We will use again an "ALT-F4-LLC" module posted on Terraform Registry that is
+designed to automate creation of github repositories.
+
+So inside `main.tf` file we will have:
+
+```hcl
+module "repository" {
+  for_each = local.repos
+
+  source  = "ALT-F4-LLC/repository/github"
+  version = "0.5.0"
+
+  description        = each.value.description
+  gitignore_template = each.value.gitignore_template
+  name               = each.value.name
+  owner              = var.owner
+  topics             = each.value.topics
+  visibility         = each.value.visibility
+}
+```
+
+Yeah, we will use locals to iterate through each key, value again. So let's
+create `locals.tf` file:
+
+```hcl
+locals {
+  repos = {
+    "fisrt-repo" = {
+      description        = ""
+      gitignore_template = "Terraform"
+      name               = "fisrt-repo"
+      topics             = ["mkdocs", "terraform"]
+      visibility         = "public"
+    }
+
+    "second-repo" = {
+      description        = ""
+      gitignore_template = "Terraform"
+      name               = "second-repo"
+      topics             = ["mkdocs", "terraform"]
+      visibility         = "public"
+    }
+  }
+}
+```
+
+*Note* The key of the map and the value of the name will be the name of the
+repos we created till now, so "first-repo" will be the name of the first-repo
+we created on the course with terraform automation and the second-repo name
+will be the one we created for repository automation in this section.
+
+Now we will need the `variables.tf` because we have a variable used in the
+repositorymodule called "owner", so let's create it.
+
+`variables.tf` file will look something like that:
+
+```hcl
+variable "owner" {
+  default = "you-username" # this will be your github username
+  type    = string
+}
+```
+
+You can go make a terraform init and validate to check if everything is fine.
+
+If all it's ok we can create a `backend.tf` file to point on our new workspace.
+The file will look something like that:
+
+```hcl
+terraform {
+  cloud {
+    organization = "terraform-organization-name"
+
+    workspaces {
+      name = "last-create-workspace-name"
+    }
+  }
+}
+```
+
+Now you can make a terraform init and plan with terraform credentials as -var,
+to see what it's creates. You will notice that it will want to create the repos
+that we already have created. So the solution for that is to import them into
+our actual state.
+
+We can do that by using the next terraform commands:
+
+```bash
+terraform import 'module.repository["second-repo-name"]github_repository.self'\
+ 'second-repo-name' \-var="TF_TOKEN_APP_TERRAFORM_IO=your-api-token"\
+    -var="TFE_TOKEN=your-api-token"
+
+terraform import 'module.repository["first-repo-name"].github_repository.self'\
+ 'first-repo-name'     -var="TF_TOKEN_APP_TERRAFORM_IO=your-api-token"\
+    -var="TFE_TOKEN=your-api-token"
+```
+
+*Note*: Change with your own repo names in that order. And use your own tokens.
+
+So now if you will do a plan and apply will take in consideration the repos that
+we already have created.
+
+In order to make it fully automated we will need to push our changes into github
+for the github automation part. So go ahead and do that.
+
+Next step in to go into Terraform Cloud and set again a variables set like we
+did before.
+
+This time we need to go attach the variable set to the most new workspace we
+created for github automation so be aware to select that workspace.
+
+We will have 2 ENVIRONEMT VARIABLES:
+1.**GITHUB_TOKEN**: At the start of the course we made a fine-grained token.
+  Key will be the "GITHUB_TOKEN" and value will be your fine-grained token.
+2.**GITHUB_OWNER**: This will be your Github username
+
+Now we got into the terraform automation repository and change workspace
+execution mode from `locals.tf`:
+
+```hcl
+locals {
+  project = {
+    "mkdocs-project" = {
+      description = "Example description of project"
+    }
+  }
+}
+
+  workspace = {
+    "mkdocs-tfe" = {
+      description    = "Example description of project"
+      execution_mode = "remote"
+      project_id     = module.project["mkdocs-project"].id
+      vcs_repo_identifier ="${var.github_organization_name}/repository-name"
+    }
+  }
+
+    "new-workspace-for-new-github-repo" = {
+      description    = "Example description of workspace"
+      execution_mode = "remote" # this needs to be remote
+      project_id     = module.project["mkdocs-project"].id
+      vcs_repo_identifier = "${var.github_organization_name}/new-github-repo"
+    }
+```
+
+Add, commit and push changes and now you should have a fully automated github
+repository creation.
