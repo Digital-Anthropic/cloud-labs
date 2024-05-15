@@ -15,7 +15,7 @@ Make sure you have accounts on all needed platforms:
   for auth.)
 - **Terraform Cloud**: Make sure you have a Terraform Cloud account with an
   organization in it you can use it.
-- **AWS**: Make sure you have an AWS account with enough permisions to create
+- **AWS**: Make sure you have an AWS account with enough permissions to create
   access tokens.
 
 *Optionally*: You can have use a secrets manager like "Doppler" to manage your
@@ -31,7 +31,7 @@ ssh-keygen
 ```
 
 Press enter and you will be redirected on a key generator. It will ask you to
-provide some a name, passprase...etc. For that moment it's important to name it
+provide some a name, passphrase...etc. For that moment it's important to name it
 appropriate so you can find it easier and know for what is created lately. (eg.
 "github_auth_machine_name" or something like that.)
 
@@ -41,7 +41,7 @@ destroyed. (eg. Maybe some cloud application designed especially for that.)
 After you created your key pair named suitable, you can now navigate to
 `~/.ssh` directory and copy the public key (so the one with `named_by_you.pub`)
 because obviously would be 2 key cuz it's a pair: private key (the one with no
-extention) and public key (the one with .pub extention).
+extension) and public key (the one with .pub extension).
 
 *Note*: You will need to copy the all content of the public key.
 
@@ -55,18 +55,18 @@ earlier in the `Key` section. ==> Click on Add SSH key. Done! You are all set.
 You can now use ssh protocol to perform actions on your github account.
 
 *Note*: You may be asked by to provide some config options before make actions.
-Like provideing your username and email to git, just follow the instruction
+Like providing your username and email to git, just follow the instruction
 git will provide to you and you should be fine.
 
 ## Secrets
 
 After you are all set up and have all the needed accounts mentioned earlier, we
 will need to create some "secrets". We call them secrets because they contain
-sensitive information like token with permision to add 10000$ resources on
+sensitive information like token with permission to add 10000$ resources on
 your AWS account :)) . So you can agree with me that we need a safe place to
 store them properly, like i mentioned earlier a secret manager. But for this
 Demo you can use what you want to store them, like a .txt file :)), but i don't
-recommand as we discussed already.
+recommend as we discussed already.
 
 ### Github Tokens
 
@@ -81,7 +81,7 @@ So what we will need to do:
 4. Go to Fine-grained tokens
 5. Click on generate new token
 6. Give a name to your token.
-7. Set an expriation date.
+7. Set an expiration date.
 8. On `Repository access` section select `All Repositories`
 9. On `Permissions` Section go to `Repository permissions` and change
   `Administration` to "Read and write"
@@ -94,7 +94,7 @@ the token you just created have access to delete all your github repositories.
 
 ### Terraform Cloud Tokens
 
-So in order to be able to comunicate with Terraform Cloud we will also need
+So in order to be able to communicate with Terraform Cloud we will also need
 some authentication. We will use a so called `User Token` in that scope.
 
 Steps to create a `User Token`:
@@ -103,7 +103,7 @@ Steps to create a `User Token`:
 2. Click to your user profile picture && click on `account settings`
 3. In the left pop-up screen you will see `Tokens` section, click on it.
 4. Click on `Create an API token`
-5. Give it a description and an expriration data.
+5. Give it a description and an expiration date.
 6. Click on generate token.
 
 After the token is created copy it into your clipboard and store it in a safe
@@ -123,7 +123,7 @@ Steps to create AWS access token:
 2. Click over your username on top-right corner of aws console.
 3. Go to `Securiy Credentials`
 4. Find `Access keys` sections and click on `Create access key`.
-5. Selecte the `Command Line Interface` use case, confirm this actions and
+5. Select the `Command Line Interface` use case, confirm this actions and
   press `Next`
 6. Give a `Desctiption Tag Value` (like for what you will use it for example)
   and click `Create access key`.
@@ -142,19 +142,19 @@ terraform `projects` and `workspaces` automated in terraform cloud by using
 terraform itself. For that we will need to use "ALT-F4-LLC" modules posted on
 Terraform Registry.
 
-### Creating a Managed Repositry
+### Creating a Managed Repository
 
 First we will need to create a Github repository to store our terraform
 automation script.
 
 Steps to Create the repository:
 
-1. To to your Github page and selecte `Repositories`
+1. To to your Github page and select `Repositories`
 2. When the Repositories list appear go on the top-right green button `New` and
   click it.
 3. Add a proper name to your repository.
 4. Select `Add a README file`
-5. And select a Terraform .gitignore tamplate.
+5. And select a Terraform .gitignore template.
 6. Create Repository.
 
 Steps to clone the repository:
@@ -178,7 +178,7 @@ git clone git@github.com:your-username/your-repo-name
 
 Now that we have the repo clone, we can go in it and put there some terraform
 automation scripts.
-As I metioned before we are going to use the terraform modules created by
+As I mentioned before we are going to use the terraform modules created by
 "ALT-F4-LLC". That modules incorporates all necessary resources of Terraform
 Cloud Provider that enable us to create, edit, delete projects and workspaces
 as we want.
@@ -187,7 +187,7 @@ as we want.
 and cloned.
 
 After we have the `main.tf` we can add the terraform script that will help us
-with creation of those projects and workspaces. They are acutally the modules
+with creation of those projects and workspaces. They are actually the modules
 from "ALT-F4-LLC" that we talked about.
 
 ```hcl
@@ -212,7 +212,7 @@ module "workspace" {
   }
 ```
 
-You will notice that inside those moduels we have variables used
+You will notice that inside those modules we have variables used
 (`organization_name = var.organization_name`). Well now we need to create them
 as we use them.
 
@@ -257,11 +257,11 @@ terraform plan \
 plan command. So all you need to change is to put your own terraform token we
 got in the previous steps in this demo and instead of "your-api-token". YOU NEED
 THE SAME TOKEN VALUE ONE THE BOTH VARIABLES. And please stick with the variables
-nameing provided in the command above.
+naming provided in the command above.
 
 After your plan command is ok it should get you 2 resources to add.
 
-Now what we want to do next is to acctually apply the plan that we created with
+Now what we want to do next is to actually apply the plan that we created with
 apply command.
 
 ```bash
@@ -275,11 +275,11 @@ terraform apply \
 the same we did for the plan part here.
 
 After the apply is done you should see a new project with a new workspace on
-your Terraform Cloud Ogranization.
+your Terraform Cloud Organization.
 
 ### Migrating state to Terraform Cloud
 
-When you will look insde the folder we put our Terraform code you will notice
+When you will look inside the folder we put our Terraform code you will notice
 that know we have some new file added by terraform. That because still have
 the state local. And our goal is also to migrate the state from our local
 machine to the cloud.
@@ -294,7 +294,7 @@ to the Terraform cloud.
 
 So after you create the `backend.tf` file, go to your Terraform Cloud web app
 and click on the brand new workspace we just created earlier. There you will find
-an "Example code", copy the the content of the example code from there and paste
+an "Example code", copy the content of the example code from there and paste
 it into your `backend.tf` file.
 
 Now that we have the `backend.tf` in place with the proper code in it, we need
@@ -352,7 +352,7 @@ don't you think?
 
 That why we will use terraform locals instead.
 
-Besically instead of just copy&paste the modules and changeing names we will
+Basically instead of just copy&paste the modules and changing names we will
 iterate through a local map.
 
 To achieve that we need to make some changes in `main.tf` file and also create
@@ -377,7 +377,7 @@ locals {
   }
 ```
 
-Now taht we have the locals that we can iterate through lets modify the
+Now that we have the locals that we can iterate through lets modify the
 `main.tf` file we have.
 
 ```hcl
@@ -409,7 +409,7 @@ module "workspace" {
 Before we init, validate, plan, and apply changes. We need to understand that
 we did not create another project and workspace. At least we do not intend to do
 so. We need to tell terraform that the actual already created terraform project
-and workspace are de one that we try to interate through locals right now.
+and workspace are de one that we try to iterate through locals right now.
 
 We can do this adding into the `main.tf` file the lines below:
 
@@ -434,10 +434,10 @@ one we just created, in my case will be "mkdocs-tfe".
 Ok in that moment you actually can init, validate, plan and apply injecting
 terraform api token using -var as we did before.
 
-*Note*: You don't have to use terraforn token to terraform validate. It's just
+*Note*: You don't have to use terraform token to terraform validate. It's just
 syntax check, it does not got to could or affect infra in any way.
 
-You Shoud have now 1 change, renameing the workspace, apply it and lets go to
+You should have now 1 change, renaming the workspace, apply it and lets go to
 the next step. P.S: You can look to your changes on your Terraform Cloud.
 
 Now that we have all set we need to push the changes into the github remote
@@ -455,12 +455,12 @@ source of truth.
 
 So shortly we want that every time we make a change into that github repository
 the changes will apply also to the Terraform Cloud, that why we connect them
-togheter.
+together.
 
 To achieve this you need to go into your Terraform Cloud organization, go to
 settings and down below you will find section "Version Control" ==> "Providers".
 
-Click on "Add VCS Providers", Go to the Github section and selecte Github App.
+Click on "Add VCS Providers", Go to the Github section and select Github App.
 Connect your account and authorize all repositories.
 
 *Note*: It is possible that will appear as "Installed" if you connected to the
@@ -473,7 +473,7 @@ you will find next to Terraform Cloud Application.
 *IMPORTANT*: You will need to COPY the CODE from the URL once you click on
 "Configure".
 
-That code will be the installation ID we will use in the next stepts, welcome to
+That code will be the installation ID we will use in the next steps, welcome to
 DevOps`:))`.
 
 Now that we have the installation ID(The CODE we just copied earlier) we can go
@@ -503,7 +503,7 @@ Now the next step is to use that `github_app_installation_id` to tell Terraform
 Cloud which workspace have access to the installation between her and Github.
 
 So we will need to create a new file called `data.tf` file that will look like
-exactily like that:
+exactly like that:
 
 ```hcl
 data "tfe_github_app_installation" "this" {
@@ -535,7 +535,7 @@ module "workspace" {
 ```
 
 You can notice that now we have a "vcs_repo_identifier" in module workspace ->
-vcs repo attribute, which has its value from locals interation, so we will need
+vcs repo attribute, which has its value from locals iteration, so we will need
 to add this also into `locals.tf` file.
 
 ```hcl
@@ -580,12 +580,12 @@ projects and workspaces, go to apply to workspaces dropdown menu and select your
 workspace.
 
 Now we need to add the actual variable so go down and you will find
-"add variable", select the variable category "environment variable". the key of
+"add variable", select the variable category "environment variable". The key of
 the variable will be "TFE_TOKEN" and the value will be the one used to do
 terraform plan for example.
 
 Now we can commit and push our changes into github and after it you can see that
-a plan will be triggered in Terraform Cloud that will hopelly succeed.
+a plan will be triggered in Terraform Cloud that will hopefully succeed.
 
 ## Github Automation
 
@@ -596,7 +596,7 @@ For that we will need to create another repository `:))`. So go to your github
 account and create another repository, you can follow the same steps we did
 before but change the name as you wish(better something related to github).
 
-Now that we have the a new repository go to the `local.tf` file we created on
+Now that we have the new repository, go to the `local.tf` file we created on
 the previous repository we created and add a new workspace for the newly created
 repository.
 
@@ -630,7 +630,7 @@ locals {
 have a state for that workspace. So we set it like that first.
 
 Now we just need to add the changes, commit and push to github and our workspace
-will be created. Wait until plan is triggerd after push and apply the changes.
+will be created. Wait until plan is triggered after push and apply the changes.
 
 Next think we need to do is to clone the repository we create for github
 automation into our machine. So go on and do that.
@@ -690,7 +690,7 @@ we created on the course with terraform automation and the second-repo name
 will be the one we created for repository automation in this section.
 
 Now we will need the `variables.tf` because we have a variable used in the
-repositorymodule called "owner", so let's create it.
+repository module called "owner", so let's create it.
 
 `variables.tf` file will look something like that:
 
@@ -749,10 +749,10 @@ did before.
 This time we need to go attach the variable set to the most new workspace we
 created for github automation so be aware to select that workspace.
 
-We will have 2 ENVIRONEMT VARIABLES:
+We will have 2 ENVIRONMENT VARIABLES:
 1.**GITHUB_TOKEN**: At the start of the course we made a fine-grained token.
   Key will be the "GITHUB_TOKEN" and value will be your fine-grained token.
-2.**GITHUB_OWNER**: This will be your Github username
+2.**GITHUB_OWNER**: This will be your Github username.
 
 Now we got into the terraform automation repository and change workspace
 execution mode from `locals.tf`:
@@ -898,9 +898,9 @@ locals {
     }
 """
 
-*Note*: We added the a new workspace with the repo identifier pointing to the
+*Note*: We added the new workspace with the repo identifier pointing to the
 newly create repo we add our aws modules. Also you will notice that we now have
-some variables on that workspace, that because we can specifiy the variables we
+some variables on that workspace, that because we can specify the variables we
 need in the workspace.
 
 Now we need to change the `main.tf`:
@@ -926,7 +926,7 @@ module "workspace" {
 }
 ```
 
-We only changed the workspace module vcs_repo parameter, acually just added
+We only changed the workspace module vcs_repo parameter, actually just added
 `variables= try(each.value.variables, [])`.
 
 After you have it all add the files changed to git, commit and push to the new
@@ -934,7 +934,7 @@ branch, make a pull request, make sure the plan it's ok and merge the branch.
 
 *Note* After you merge the branch let it plan but do not apply.
 
-first we need to add the environmet variables for the AWS we optained first on
+First we need to add the environment variables for the AWS we obtained first on
 the course. So now go to the Terraform Cloud settings again and add a new set of
 variables.
 
