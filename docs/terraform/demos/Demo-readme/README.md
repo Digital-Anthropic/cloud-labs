@@ -785,3 +785,173 @@ locals {
 
 Add, commit and push changes and now you should have a fully automated github
 repository creation.
+
+*NOTE*: You may need uncheck "Do not allow bypassing the above settings" from
+branches protection github branches. OR you can create a new branch an merge it
+into to apply your changes.
+
+## AWS Automation
+
+The scope of this chapter is to automate the creation of some AWS resources like
+S3 Buckets, CloudFront and Lambda Egde.
+
+First we need to create a repository for those Amazon resources. So go into your
+Github Automation repository and add another repo on `locals.tf` file.
+
+Should look somethinng like that:
+
+```hcl
+locals {
+  repos = {
+    "fisrt-repo" = {
+      description        = ""
+      gitignore_template = "Terraform"
+      name               = "fisrt-repo"
+      topics             = ["mkdocs", "terraform"]
+      visibility         = "public"
+    }
+
+    "second-repo" = {
+      description        = ""
+      gitignore_template = "Terraform"
+      name               = "second-repo"
+      topics             = ["mkdocs", "terraform"]
+      visibility         = "public"
+    }
+  }
+
+    "third-repo" = {
+      description        = ""
+      gitignore_template = "Terraform"
+      name               = "third-repo"
+      topics             = ["mkdocs", "terraform"]
+      visibility         = "public"
+    }
+  }
+```
+
+Create a new branch, commit your changes to that branch and push. You now can go
+an create a pull request on github, see if the plan is ok. Now you can merge the
+new branch into main, wait the plan again and apply the plan. Now you will have
+a new repository in your github account.
+
+After you do this you clone the newly created repo on your machine.
+
+Now we need to add some terraform modules into that repository that allow us to
+create AWS resources(S3-bucket, Cloudfront and Lambda Edge). In order to do that
+I will provide a link below with a repository where you will find exactly all
+files you need to have in that repository to be able to create those resources.
+This link we are talking about you will find below:
+
+*IMPORTANT*: <https://github.com/Digital-Anthropic/terraform-aws-cloudfront>
+
+After you have into your repository all those files existent in the link
+provided you can go and create again a new branch, commit your changes, push to
+github, create a pull request, see if all it's ok and merge.
+
+Now that you have all required files into your github remote repository, we need
+to add a workspace for that repository.
+
+Go the terraform automation repository and there we need to change 2 files:
+`main.tf` and "locals.tf", lets start with `locals.tf`:
+
+"""hcl
+locals {
+  project = {
+    "mkdocs-project" = {
+      description = "Example description of project"
+    }
+  }
+}
+
+  workspace = {
+    "mkdocs-tfe" = {
+      description    = "Example description of project"
+      execution_mode = "remote"
+      project_id     = module.project["mkdocs-project"].id
+      vcs_repo_identifier ="${var.github_organization_name}/repository-name"
+    }
+  }
+    "new-workspace-for-new-github-repo" = {
+      description    = "Example description of workspace"
+      execution_mode = "remote" # this needs to be remote
+      project_id     = module.project["mkdocs-project"].id
+      vcs_repo_identifier = "${var.github_organization_name}/new-github-repo"
+    }
+    "aws-repo-workspace" = {
+      description    = "Example description of workspace"
+      execution_mode = "remote"
+      project_id     = module.project["mkdocs-project"].id
+      vcs_repo_identifier = "${var.github_organization_name}/aws-repo-name"
+      variables = [
+        {
+          caterogy = "terraform"
+          key = "bucket_name"
+          value = "mkdocs-bucket"
+        },
+        {
+          caterogy = "terraform"
+          key = "cloudfront_price_class"
+          value = "PriceClass_100"
+        },
+      ]
+    }
+"""
+
+*Note*: We added the a new workspace with the repo identifier pointing to the
+newly create repo we add our aws modules. Also you will notice that we now have
+some variables on that workspace, that because we can specifiy the variables we
+need in the workspace.
+
+Now we need to change the `main.tf`:
+
+```hcl
+module "workspace" {
+  for_each = local.workspace
+
+  source = "ALT-F4-LLC/workspace/tfe"
+  version = "0.8.0"
+
+  description = each.value.description
+  name = each.key
+  execution_mode = each.value.execution_mode
+  organization_name = var.organization_name
+  project_id = each.value.project_id
+  
+  vcs_repo = {
+    github_app_installation_id = data.tfe_github_app_installation.this.id
+    identifier                 = each.value.vcs_repo_identifier
+    variables                  = try(each.value.variables, [])
+    }
+}
+```
+
+We only changed the workspace module vcs_repo parameter, acually just added
+`variables= try(each.value.variables, [])`.
+
+After you have it all add the files changed to git, commit and push to the new
+branch, make a pull request, make sure the plan it's ok and merge the branch.
+
+*Note* After you merge the branch let it plan but do not apply.
+
+first we need to add the environmet variables for the AWS we optained first on
+the course. So now go to the Terraform Cloud settings again and add a new set of
+variables.
+
+As we did before add a name BUT NOW WE DON'T HAVE THE WORKSPACE TO ATTACH IT ON,
+that because we did not created yet. SO just create the variables set and do not
+attach them to a workspace.
+
+ENVIRONMENT Variables:
+
+1. AWS_ACCESS_KEY_ID = "THE ID OF THE AWS ACCESS KEY WE CREATED" SENSITIVE
+2. AWS_DEFAULT_REGION ="eu_east_1" NOT SENSITIVE
+3. AWS_SECRET_ACCESS_KEY = "THE VALUE OF THE ACCESS KEY" SENSITIVE
+
+After you created those variables you can go apply your plan. AND after the plan
+is fully applied you now can go to those variable sets you created and attach to
+the newly created workspace.
+
+Now you should have a plan that will auto create the resources to the amazon. If
+will fail just try plan and apply again manually from the Terraform Cloud web
+app.
